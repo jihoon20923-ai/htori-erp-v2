@@ -1,4 +1,4 @@
-// app.js - HTORI ERP v2 (기본: Stock + Purchase + Outgoing)
+// app.js — HTORI ERP v2 (Stock + Purchase + Outgoing + Production)
 
 // -------------------------
 // 1. Firebase 초기화
@@ -26,30 +26,26 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-// 전역으로 쓸 수 있도록
+// 메뉴에서 쓸 수 있게 window에 노출
 window.loadPage = loadPage;
 
+// 처음 로딩 시
+document.addEventListener("DOMContentLoaded", () => {
+  loadPage("dashboard");
+});
+
 // -------------------------
-// 2. 페이지 라우팅
+// 2. 메뉴 라우팅
 // -------------------------
 function loadPage(page) {
-  if (page === "dashboard") {
-    renderDashboard();
-  } else if (page === "stock") {
-    renderStockPage();
-  } else if (page === "purchase") {
-    renderPurchasePage();
-  } else if (page === "outgoing") {
-    renderOutgoingPage();
-  } else {
-    renderDashboard();
-  }
-}
+  if (page === "stock") return renderStockPage();
+  if (page === "purchase") return renderPurchasePage();
+  if (page === "outgoing") return renderOutgoingPage();
+  if (page === "production") return renderProductionPage();
 
-// 처음 로드 시
-document.addEventListener("DOMContentLoaded", () => {
+  // 기본
   renderDashboard();
-});
+}
 
 // -------------------------
 // 3. Dashboard
@@ -58,32 +54,31 @@ function renderDashboard() {
   const content = document.getElementById("content");
   content.innerHTML = `
     <h2>Dashboard</h2>
-    <p>우선은 Stock / Purchase / Outgoing 기능부터 테스트해보세요.</p>
+    <p>왼쪽 메뉴에서 기능을 선택하세요.</p>
     <ul>
-      <li>왼쪽 메뉴에서 <b>Purchase</b>로 들어가서 입고 데이터를 입력하면, Firebase에 저장되면서 <b>재고(Stock)</b>가 자동 증가합니다.</li>
-      <li><b>Outgoing</b>에서는 재고를 차감할 수 있습니다.</li>
-      <li><b>Stock</b>에서는 현재 재고 리스트를 볼 수 있고, MinQty보다 낮으면 경고 표시가 뜹니다.</li>
+      <li><b>Purchase</b> : 입고 → 재고 증가</li>
+      <li><b>Outgoing</b> : 출고 → 재고 감소</li>
+      <li><b>Stock</b> : 현재 재고 확인</li>
+      <li><b>Production</b> : 원자재 차감 + 완제품 증가</li>
     </ul>
   `;
 }
 
-// -------------------------
-// 4. Stock (materials)
-// -------------------------
+// =========================
+// 4. STOCK 화면
+// =========================
 async function renderStockPage() {
   const content = document.getElementById("content");
   content.innerHTML = `
     <h2>Stock</h2>
-    <p>Firebase의 <code>materials</code> 데이터를 불러와서 보여줍니다.</p>
+    <p>Firebase의 <code>materials</code> 데이터를 조회합니다.</p>
     <div id="stock-table-wrapper">Loading...</div>
   `;
 
-  const matRef = ref(db, "materials");
-  const snap   = await get(matRef);
-
+  const snap = await get(ref(db, "materials"));
   if (!snap.exists()) {
     document.getElementById("stock-table-wrapper").innerHTML = `
-      <p>재고 데이터가 없습니다. Purchase에서 입고를 먼저 해보세요.</p>
+      <p>재고 데이터가 없습니다. 먼저 Purchase에서 입고를 해보세요.</p>
     `;
     return;
   }
@@ -94,8 +89,8 @@ async function renderStockPage() {
   Object.keys(data).forEach(code => {
     const m = data[code];
     const qty    = Number(m.qty || 0);
-    const minQty = Number(m.minQty || 0);
-    const low = minQty > 0 && qty < minQty;
+    const min    = Number(m.minQty || 0);
+    const low    = min > 0 && qty < min;
 
     rows += `
       <tr>
@@ -106,7 +101,7 @@ async function renderStockPage() {
           ${low ? `<span class="badge-low">LOW</span>` : ""}
         </td>
         <td>${m.unit || ""}</td>
-        <td>${minQty || ""}</td>
+        <td>${min || ""}</td>
         <td>${m.location || ""}</td>
       </tr>
     `;
@@ -131,14 +126,14 @@ async function renderStockPage() {
   `;
 }
 
-// -------------------------
-// 5. Purchase → Stock 증가
-// -------------------------
+// =========================
+// 5. PURCHASE (입고)
+// =========================
 function renderPurchasePage() {
   const content = document.getElementById("content");
   content.innerHTML = `
     <h2>Purchase (입고)</h2>
-    <p>입고를 입력하면 materials 재고가 자동으로 증가합니다.</p>
+    <p>입고를 입력하면 materials 재고가 자동 증가합니다.</p>
 
     <form id="purchase-form">
       <div class="form-row">
@@ -171,8 +166,7 @@ function renderPurchasePage() {
     </form>
   `;
 
-  const form = document.getElementById("purchase-form");
-  form.addEventListener("submit", async (e) => {
+  document.getElementById("purchase-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     await handlePurchaseSubmit();
   });
@@ -191,11 +185,11 @@ async function handlePurchaseSubmit() {
     return;
   }
 
-  // 1) PURCHASE 기록 남기기 (간단 버전)
+  const now = new Date().toISOString();
+
+  // 1) purchases 로그
   const poRef = ref(db, "purchases");
   const newPo = push(poRef);
-  const now   = new Date().toISOString();
-
   await set(newPo, {
     date: now,
     code,
@@ -207,35 +201,37 @@ async function handlePurchaseSubmit() {
     status: "DONE"
   });
 
-  // 2) materials 재고 증가 (이미 있으면 +, 없으면 신규)
-  const matRef   = ref(db, "materials/" + code);
-  const matSnap  = await get(matRef);
+  // 2) materials 재고 증가
+  const matRef  = ref(db, "materials/" + code);
+  const matSnap = await get(matRef);
   let currentQty = 0;
+  let prev = {};
 
   if (matSnap.exists()) {
-    currentQty = Number(matSnap.val().qty || 0);
+    prev = matSnap.val();
+    currentQty = Number(prev.qty || 0);
   }
 
   await set(matRef, {
     code,
-    name: name || (matSnap.exists() ? matSnap.val().name : ""),
+    name: name || prev.name || "",
     qty: currentQty + qty,
-    unit,
-    minQty: min || (matSnap.exists() ? (matSnap.val().minQty || 0) : 0),
-    location: loc || (matSnap.exists() ? (matSnap.val().location || "") : "")
+    unit: unit || prev.unit || "pcs",
+    minQty: min || prev.minQty || 0,
+    location: loc || prev.location || ""
   });
 
   alert("입고 및 재고 업데이트 완료!");
 }
 
-// -------------------------
-// 6. Outgoing → Stock 감소
-// -------------------------
+// =========================
+// 6. OUTGOING (출고)
+// =========================
 function renderOutgoingPage() {
   const content = document.getElementById("content");
   content.innerHTML = `
     <h2>Outgoing (출고)</h2>
-    <p>재고에서 수량을 차감합니다. (예: 생산 투입, 폐기 등)</p>
+    <p>생산 투입, 샘플, 폐기 등으로 재고를 감소시킵니다.</p>
 
     <form id="outgoing-form">
       <div class="form-row">
@@ -256,8 +252,7 @@ function renderOutgoingPage() {
     </form>
   `;
 
-  const form = document.getElementById("outgoing-form");
-  form.addEventListener("submit", async (e) => {
+  document.getElementById("outgoing-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     await handleOutgoingSubmit();
   });
@@ -294,7 +289,7 @@ async function handleOutgoingSubmit() {
     qty: currentQty - qty
   });
 
-  // 2) 간단 Outgoing 로그 남기기
+  // 2) outgoing 로그
   const outRef = ref(db, "outgoing_logs");
   const newOut = push(outRef);
   const now    = new Date().toISOString();
@@ -308,197 +303,124 @@ async function handleOutgoingSubmit() {
 
   alert("출고 처리 완료!");
 }
-// -------------------------
-// 7. BOM 관리
-// -------------------------
-function loadPage(page) {
-  if (page === "bom") return renderBOMPage();
-  if (page === "production") return renderProductionPage();
-  if (page === "finished") return renderFinishedGoods();
-  ...
-}
 
-// 1) BOM 화면
-function renderBOMPage() {
-  const content = document.getElementById("content");
-  content.innerHTML = `
-    <h2>BOM (원자재 구성)</h2>
-    <p>완제품 1개를 만들 때 필요한 원자재 사용량을 등록합니다.</p>
-
-    <form id="bom-form">
-      <div class="form-row">
-        <label>Finished Code</label><input id="b-fcode" required />
-      </div>
-      <div class="form-row">
-        <label>Material Code</label><input id="b-mcode" required />
-      </div>
-      <div class="form-row">
-        <label>Usage per 1 unit</label><input type="number" id="b-usage" required />
-      </div>
-      <button class="btn btn-primary" type="submit">추가</button>
-    </form>
-
-    <h3>BOM 리스트</h3>
-    <div id="bom-table">Loading…</div>
-  `;
-
-  document.getElementById("bom-form").addEventListener("submit", saveBOM);
-  loadBOMTable();
-}
-
-// BOM 저장
-async function saveBOM(e) {
-  e.preventDefault();
-  const fcode = document.getElementById("b-fcode").value.trim();
-  const mcode = document.getElementById("b-mcode").value.trim();
-  const usage = Number(document.getElementById("b-usage").value);
-
-  await push(ref(db, "bom/" + fcode), {
-    material: mcode,
-    usage: usage
-  });
-
-  alert("BOM 추가됨");
-  loadBOMTable();
-}
-
-// BOM 테이블 로드
-async function loadBOMTable() {
-  const box = document.getElementById("bom-table");
-  const snap = await get(ref(db, "bom"));
-
-  if (!snap.exists()) {
-    box.innerHTML = "BOM 없음";
-    return;
-  }
-
-  let html = "<table class='table'><tr><th>Finished</th><th>Material</th><th>Usage</th></tr>";
-
-  const data = snap.val();
-  Object.keys(data).forEach(fcode => {
-    Object.values(data[fcode]).forEach(item => {
-      html += `<tr>
-        <td>${fcode}</td>
-        <td>${item.material}</td>
-        <td>${item.usage}</td>
-      </tr>`;
-    });
-  });
-
-  html += "</table>";
-  box.innerHTML = html;
-}
-// ---------------------------
-// 8. Production (생산)
-// ---------------------------
+// =========================
+// 7. PRODUCTION (생산)
+// =========================
+//
+// 간단 버전:
+// - 원자재 1종 사용 (rawCode)
+// - 원자재 사용량 = goodQty * usagePerUnit
+// - 원자재 차감 + FinishedGoods 증가
+// =========================
 function renderProductionPage() {
   const content = document.getElementById("content");
   content.innerHTML = `
-    <h2>Production</h2>
-    <p>GoodQty 만큼 원자재가 차감되고 완제품이 증가합니다.</p>
+    <h2>Production (생산)</h2>
+    <p>
+      FinishedCode / GoodQty 와 사용 원자재 코드를 입력하면,<br/>
+      원자재 재고를 차감하고 FinishedGoods 수량을 증가시킵니다.
+    </p>
 
     <form id="prod-form">
       <div class="form-row">
-        <label>Finished Code</label><input id="pr-fcode" required />
+        <label>Finished Code</label>
+        <input type="text" id="pr-fcode" required />
       </div>
       <div class="form-row">
-        <label>Good Qty</label><input type="number" id="pr-good" required />
+        <label>Finished Name</label>
+        <input type="text" id="pr-fname" />
       </div>
-      <button class="btn btn-primary" type="submit">생산 처리</button>
+      <div class="form-row">
+        <label>Good Qty</label>
+        <input type="number" id="pr-good" required />
+      </div>
+      <hr/>
+      <div class="form-row">
+        <label>Raw Material Code</label>
+        <input type="text" id="pr-rawcode" required />
+      </div>
+      <div class="form-row">
+        <label>Usage per 1 Finished</label>
+        <input type="number" id="pr-usage" required />
+      </div>
+      <div class="form-row">
+        <button type="submit" class="btn btn-primary">생산 처리</button>
+      </div>
     </form>
   `;
 
-  document.getElementById("prod-form").addEventListener("submit", processProduction);
+  document.getElementById("prod-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    await handleProductionSubmit();
+  });
 }
 
-async function processProduction(e) {
-  e.preventDefault();
-  const fcode = document.getElementById("pr-fcode").value.trim();
-  const good  = Number(document.getElementById("pr-good").value);
+async function handleProductionSubmit() {
+  const fcode   = document.getElementById("pr-fcode").value.trim();
+  const fname   = document.getElementById("pr-fname").value.trim();
+  const goodQty = Number(document.getElementById("pr-good").value);
+  const rawCode = document.getElementById("pr-rawcode").value.trim();
+  const usage   = Number(document.getElementById("pr-usage").value);
 
-  // 1) BOM 불러오기
-  const bomSnap = await get(ref(db, "bom/" + fcode));
-  if (!bomSnap.exists()) return alert("이 FinishedCode의 BOM이 없습니다!");
-
-  const bom = bomSnap.val();
-
-  // 2) 원자재 차감
-  for (let key in bom) {
-    let item = bom[key];
-    let need = item.usage * good;
-
-    let matRef = ref(db, "materials/" + item.material);
-    let matSnap = await get(matRef);
-
-    if (!matSnap.exists()) return alert("Stock에 없음: " + item.material);
-
-    let cur = matSnap.val().qty;
-    if (cur < need) return alert(`재고 부족: ${item.material} 필요 ${need}, 현재 ${cur}`);
-
-    await update(matRef, { qty: cur - need });
-  }
-
-  // 3) 완제품 증가
-  let fgRef = ref(db, "finished_goods/" + fcode);
-  let fgSnap = await get(fgRef);
-  let current = fgSnap.exists() ? Number(fgSnap.val().qty) : 0;
-
-  await set(fgRef, { qty: current + good });
-
-  alert("생산 완료!");
-}
-// ---------------------------
-// 9. Finished Goods
-// ---------------------------
-async function renderFinishedGoods() {
-  const content = document.getElementById("content");
-  content.innerHTML = `
-    <h2>Finished Goods</h2>
-    <div id="fg-table">Loading…</div>
-  `;
-
-  const snap = await get(ref(db, "finished_goods"));
-  if (!snap.exists()) {
-    document.getElementById("fg-table").innerHTML = "데이터 없음";
+  if (!fcode || !rawCode || goodQty <= 0 || usage <= 0) {
+    alert("필수 값(FinishedCode, RawCode, GoodQty, Usage)을 확인하세요.");
     return;
   }
 
-  const data = snap.val();
-  let rows = "";
+  const need = goodQty * usage;
 
-  Object.keys(data).forEach(code => {
-    rows += `
-      <tr>
-        <td>${code}</td>
-        <td>${data[code].qty}</td>
-      </tr>
-    `;
+  // 1) 원자재 재고 확인 및 차감
+  const rawRef  = ref(db, "materials/" + rawCode);
+  const rawSnap = await get(rawRef);
+
+  if (!rawSnap.exists()) {
+    alert("원자재 코드가 STOCK에 없습니다: " + rawCode);
+    return;
+  }
+
+  const rawData = rawSnap.val();
+  const currentRawQty = Number(rawData.qty || 0);
+
+  if (currentRawQty < need) {
+    alert(`원자재 재고 부족: 필요 ${need}, 현재 ${currentRawQty}`);
+    return;
+  }
+
+  await update(rawRef, {
+    qty: currentRawQty - need
   });
 
-  document.getElementById("fg-table").innerHTML = `
-    <table class="table">
-      <tr><th>Finished Code</th><th>Qty</th></tr>
-      ${rows}
-    </table>
-  `;
-}
-// 페이지 로딩 함수
-function loadPage(pageName) {
-    const content = document.getElementById("content");
+  // 2) FinishedGoods 증가
+  const fgRef  = ref(db, "finished_goods/" + fcode);
+  const fgSnap = await get(fgRef);
+  let curFg = 0;
+  let fgPrev = {};
 
-    fetch(`pages/${pageName}.html`)
-        .then(res => {
-            if (!res.ok) {
-                return "<h2>Page not found</h2>";
-            }
-            return res.text();
-        })
-        .then(html => {
-            content.innerHTML = html;
-        })
-        .catch(err => {
-            content.innerHTML = "<h2>Error loading page</h2>";
-            console.error(err);
-        });
-}
+  if (fgSnap.exists()) {
+    fgPrev = fgSnap.val();
+    curFg = Number(fgPrev.qty || 0);
+  }
 
+  await set(fgRef, {
+    code: fcode,
+    name: fname || fgPrev.name || "",
+    qty: curFg + goodQty
+  });
+
+  // 3) production_logs 기록
+  const prRef = ref(db, "productions");
+  const now   = new Date().toISOString();
+  const newPr = push(prRef);
+  await set(newPr, {
+    date: now,
+    finishedCode: fcode,
+    finishedName: fname,
+    goodQty,
+    rawCode,
+    usagePerUnit: usage,
+    totalRawUsed: need
+  });
+
+  alert("생산 처리 완료! (원자재 차감 + 완제품 증가)");
+}
