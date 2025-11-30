@@ -1,42 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>HTORI ERP - v2</title>
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <title>HTORI ERP</title>
+
+    <!-- CSS 경로 수정됨 -->
+    <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
 
-  <header class="header">
+<header class="header">
     <div class="logo">HTORI ERP</div>
     <div class="header-right">
-      <span id="user-info">Demo User</span>
-      <span class="lang-btn" onclick="alert('언어 기능은 나중에 붙이자 😊')">Lang</span>
+        <span class="lang-btn" onclick="setLanguage('EN')">EN</span>
+        <span class="lang-btn" onclick="setLanguage('KR')">KR</span>
+        <span class="lang-btn" onclick="setLanguage('ID')">ID</span>
     </div>
-  </header>
+</header>
 
-  <aside class="sidebar">
+<aside class="sidebar">
     <ul>
-      <li onclick="loadPage('dashboard')" id="menu-dashboard">Dashboard</li>
-      <li onclick="loadPage('stock')" id="menu-stock">Stock</li>
-      <li onclick="loadPage('purchase')" id="menu-purchase">Purchase</li>
-      <li onclick="loadPage('outgoing')" id="menu-outgoing">Outgoing</li>
-      <!-- 나중에 추가할 메뉴들 -->
-      <!-- <li onclick="loadPage('production')">Production</li> -->
-      <!-- <li onclick="loadPage('finished')">Finished Goods</li> -->
+        <li onclick="loadPage('dashboard')">Dashboard</li>
+        <li onclick="loadPage('stock')">Stock</li>
+        <li onclick="loadPage('purchase')">Purchase</li>
+        <li onclick="loadPage('outgoing')">Outgoing</li>
+        <li onclick="loadPage('production')">Production</li>
+        <li onclick="loadPage('outsourcing')">Outsourcing</li>
+        <li onclick="loadPage('finished')">Finished Goods</li>
+        <li onclick="loadPage('employees')">Employees</li>
+        <li onclick="loadPage('attendance')">Attendance</li>
+        <li onclick="loadPage('payroll')">Payroll</li>
+        <li onclick="loadPage('logs')">Logs</li>
+        <li onclick="loadPage('settings')">Settings</li>
     </ul>
-  </aside>
+</aside>
 
-  <main id="content" class="content">
-    <!-- JS에서 이 영역을 채움 -->
-  </main>
+<main id="content" class="content">
+    <h2>Welcome to HTORI ERP</h2>
+    <p>Select a menu from the left.</p>
+</main>
 
-  <!-- Firebase + 로직 -->
-  <script type="module" src="app.js"></script>
+<!-- Firebase, App.js 경로 수정됨 -->
+<script type="module" src="./firebase.js"></script>
+<script type="module" src="./app.js"></script>
+
 </body>
-  
 </html>
-<li onclick="loadPage('bom')">BOM</li>
-<li onclick="loadPage('production')">Production</li>
-<li onclick="loadPage('finished')">Finished Goods</li>
-
