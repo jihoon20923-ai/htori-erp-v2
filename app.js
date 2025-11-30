@@ -308,4 +308,84 @@ async function handleOutgoingSubmit() {
 
   alert("출고 처리 완료!");
 }
+// -------------------------
+// 7. BOM 관리
+// -------------------------
+function loadPage(page) {
+  if (page === "bom") return renderBOMPage();
+  if (page === "production") return renderProductionPage();
+  if (page === "finished") return renderFinishedGoods();
+  ...
+}
+
+// 1) BOM 화면
+function renderBOMPage() {
+  const content = document.getElementById("content");
+  content.innerHTML = `
+    <h2>BOM (원자재 구성)</h2>
+    <p>완제품 1개를 만들 때 필요한 원자재 사용량을 등록합니다.</p>
+
+    <form id="bom-form">
+      <div class="form-row">
+        <label>Finished Code</label><input id="b-fcode" required />
+      </div>
+      <div class="form-row">
+        <label>Material Code</label><input id="b-mcode" required />
+      </div>
+      <div class="form-row">
+        <label>Usage per 1 unit</label><input type="number" id="b-usage" required />
+      </div>
+      <button class="btn btn-primary" type="submit">추가</button>
+    </form>
+
+    <h3>BOM 리스트</h3>
+    <div id="bom-table">Loading…</div>
+  `;
+
+  document.getElementById("bom-form").addEventListener("submit", saveBOM);
+  loadBOMTable();
+}
+
+// BOM 저장
+async function saveBOM(e) {
+  e.preventDefault();
+  const fcode = document.getElementById("b-fcode").value.trim();
+  const mcode = document.getElementById("b-mcode").value.trim();
+  const usage = Number(document.getElementById("b-usage").value);
+
+  await push(ref(db, "bom/" + fcode), {
+    material: mcode,
+    usage: usage
+  });
+
+  alert("BOM 추가됨");
+  loadBOMTable();
+}
+
+// BOM 테이블 로드
+async function loadBOMTable() {
+  const box = document.getElementById("bom-table");
+  const snap = await get(ref(db, "bom"));
+
+  if (!snap.exists()) {
+    box.innerHTML = "BOM 없음";
+    return;
+  }
+
+  let html = "<table class='table'><tr><th>Finished</th><th>Material</th><th>Usage</th></tr>";
+
+  const data = snap.val();
+  Object.keys(data).forEach(fcode => {
+    Object.values(data[fcode]).forEach(item => {
+      html += `<tr>
+        <td>${fcode}</td>
+        <td>${item.material}</td>
+        <td>${item.usage}</td>
+      </tr>`;
+    });
+  });
+
+  html += "</table>";
+  box.innerHTML = html;
+}
 
