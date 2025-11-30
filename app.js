@@ -482,4 +482,23 @@ async function renderFinishedGoods() {
     </table>
   `;
 }
+// 페이지 로딩 함수
+function loadPage(pageName) {
+    const content = document.getElementById("content");
+
+    fetch(`pages/${pageName}.html`)
+        .then(res => {
+            if (!res.ok) {
+                return "<h2>Page not found</h2>";
+            }
+            return res.text();
+        })
+        .then(html => {
+            content.innerHTML = html;
+        })
+        .catch(err => {
+            content.innerHTML = "<h2>Error loading page</h2>";
+            console.error(err);
+        });
+}
 
