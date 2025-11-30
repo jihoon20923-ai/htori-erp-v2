@@ -388,4 +388,63 @@ async function loadBOMTable() {
   html += "</table>";
   box.innerHTML = html;
 }
+// ---------------------------
+// 8. Production (생산)
+// ---------------------------
+function renderProductionPage() {
+  const content = document.getElementById("content");
+  content.innerHTML = `
+    <h2>Production</h2>
+    <p>GoodQty 만큼 원자재가 차감되고 완제품이 증가합니다.</p>
+
+    <form id="prod-form">
+      <div class="form-row">
+        <label>Finished Code</label><input id="pr-fcode" required />
+      </div>
+      <div class="form-row">
+        <label>Good Qty</label><input type="number" id="pr-good" required />
+      </div>
+      <button class="btn btn-primary" type="submit">생산 처리</button>
+    </form>
+  `;
+
+  document.getElementById("prod-form").addEventListener("submit", processProduction);
+}
+
+async function processProduction(e) {
+  e.preventDefault();
+  const fcode = document.getElementById("pr-fcode").value.trim();
+  const good  = Number(document.getElementById("pr-good").value);
+
+  // 1) BOM 불러오기
+  const bomSnap = await get(ref(db, "bom/" + fcode));
+  if (!bomSnap.exists()) return alert("이 FinishedCode의 BOM이 없습니다!");
+
+  const bom = bomSnap.val();
+
+  // 2) 원자재 차감
+  for (let key in bom) {
+    let item = bom[key];
+    let need = item.usage * good;
+
+    let matRef = ref(db, "materials/" + item.material);
+    let matSnap = await get(matRef);
+
+    if (!matSnap.exists()) return alert("Stock에 없음: " + item.material);
+
+    let cur = matSnap.val().qty;
+    if (cur < need) return alert(`재고 부족: ${item.material} 필요 ${need}, 현재 ${cur}`);
+
+    await update(matRef, { qty: cur - need });
+  }
+
+  // 3) 완제품 증가
+  let fgRef = ref(db, "finished_goods/" + fcode);
+  let fgSnap = await get(fgRef);
+  let current = fgSnap.exists() ? Number(fgSnap.val().qty) : 0;
+
+  await set(fgRef, { qty: current + good });
+
+  alert("생산 완료!");
+}
 
