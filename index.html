@@ -1,1 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HTORI ERP - v2</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo">HTORI ERP</div>
+    <div class="header-right">
+      <span id="user-info">Demo User</span>
+      <span class="lang-btn" onclick="alert('언어 기능은 나중에 붙이자 😊')">Lang</span>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <ul>
+      <li onclick="loadPage('dashboard')" id="menu-dashboard">Dashboard</li>
+      <li onclick="loadPage('stock')" id="menu-stock">Stock</li>
+      <li onclick="loadPage('purchase')" id="menu-purchase">Purchase</li>
+      <li onclick="loadPage('outgoing')" id="menu-outgoing">Outgoing</li>
+      <!-- 나중에 추가할 메뉴들 -->
+      <!-- <li onclick="loadPage('production')">Production</li> -->
+      <!-- <li onclick="loadPage('finished')">Finished Goods</li> -->
+    </ul>
+  </aside>
+
+  <main id="content" class="content">
+    <!-- JS에서 이 영역을 채움 -->
+  </main>
+
+  <!-- Firebase + 로직 -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>
 
