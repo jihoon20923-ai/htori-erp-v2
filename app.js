@@ -447,4 +447,39 @@ async function processProduction(e) {
 
   alert("생산 완료!");
 }
+// ---------------------------
+// 9. Finished Goods
+// ---------------------------
+async function renderFinishedGoods() {
+  const content = document.getElementById("content");
+  content.innerHTML = `
+    <h2>Finished Goods</h2>
+    <div id="fg-table">Loading…</div>
+  `;
+
+  const snap = await get(ref(db, "finished_goods"));
+  if (!snap.exists()) {
+    document.getElementById("fg-table").innerHTML = "데이터 없음";
+    return;
+  }
+
+  const data = snap.val();
+  let rows = "";
+
+  Object.keys(data).forEach(code => {
+    rows += `
+      <tr>
+        <td>${code}</td>
+        <td>${data[code].qty}</td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("fg-table").innerHTML = `
+    <table class="table">
+      <tr><th>Finished Code</th><th>Qty</th></tr>
+      ${rows}
+    </table>
+  `;
+}
 
