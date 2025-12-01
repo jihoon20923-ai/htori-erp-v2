@@ -6,6 +6,38 @@
 
     <link rel="stylesheet" href="./style.css" />
 </head>
+    <!-- PDF Export용 라이브러리 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Supplier Detail Modal -->
+<div id="supplierModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Supplier Detail</h3>
+    <div class="form-grid">
+      <input id="editSupplierName" placeholder="Supplier Name" disabled>
+      <input id="editVendorName" placeholder="Vendor Name">
+      <input id="editContactPerson" placeholder="Contact Person">
+      <input id="editEmail" placeholder="Email">
+      <input id="editAddress" placeholder="Address">
+      <input id="editPhone" placeholder="Phone">
+      <input id="editBankName" placeholder="Bank Name">
+      <input id="editBankAccount" placeholder="Bank Account">
+      <input id="editBankHolder" placeholder="Bank Holder">
+    </div>
+
+    <h4>AP Payment (미지급 결제)</h4>
+    <div class="form-row">
+      <input id="apPayAmount" type="number" placeholder="Amount to Pay">
+      <button onclick="payAP()" class="btn-mini">결제 등록</button>
+    </div>
+
+    <div class="modal-btns">
+      <button onclick="saveSupplierEdit()" class="btn-primary">저장</button>
+      <button onclick="closeSupplierModal()" class="btn-secondary">닫기</button>
+    </div>
+  </div>
+</div>
+
 <body>
 
 <header class="header">
