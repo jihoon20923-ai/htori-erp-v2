@@ -1829,3 +1829,82 @@ window.saveSupplierEdit = saveSupplierEdit;
 window.payAP = payAP;
 window.setSupplierChart = setSupplierChart;
 window.exportSuppliersPDF = exportSuppliersPDF;
+
+/*************************************************
+ * BACKUP + RESTORE MODULE (FULL ERP)
+ *************************************************/
+
+const ERP_KEYS = [
+  "stock",
+  "purchase",
+  "outgoing",
+  "production",
+  "outsourcing",
+  "suppliers",
+  "vendors",
+  "bom",
+  "logs"
+];
+
+/* -----------------------------
+   1) 백업 (Download JSON)
+------------------------------ */
+function backupData() {
+  const backup = {};
+  ERP_KEYS.forEach(key => {
+    backup[key] = JSON.parse(localStorage.getItem(key) || "[]");
+  });
+
+  const fileName =
+    "htori-backup-" +
+    new Date().toISOString().replace(/[:.]/g, "-") +
+    ".json";
+
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {
+    type: "application/json",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  alert("백업 파일이 다운로드되었습니다!");
+}
+
+/* -----------------------------
+   2) 복원 - 파일 선택창 열기
+------------------------------ */
+function restoreDataOpen() {
+  document.getElementById("restoreFile").click();
+}
+
+/* -----------------------------
+   3) 복원 로직 (파일 읽기)
+------------------------------ */
+document.getElementById("restoreFile").addEventListener("change", function (e) {
+  const file = e.target.files[0];
+  if (!file) return alert("파일을 선택하세요.");
+
+  const reader = new FileReader();
+  reader.onload = function (event) {
+    try {
+      const data = JSON.parse(event.target.result);
+
+      ERP_KEYS.forEach(key => {
+        if (data[key]) {
+          localStorage.setItem(key, JSON.stringify(data[key]));
+        }
+      });
+
+      alert("복원 완료! ERP 데이터를 새로고침합니다.");
+      location.reload();
+
+    } catch (err) {
+      alert("복원 실패: JSON 파일이 아닙니다.");
+    }
+  };
+  reader.readAsText(file);
+});
