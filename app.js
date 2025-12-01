@@ -69,6 +69,13 @@ const i18n = {
       logsDesc: "System activity history.",
       settingsTitle: "Settings",
       settingsDesc: "ERP basic settings.",
+      dashRawLabel: "Raw Material Stock",
+      dashFinishedLabel: "Finished Goods Stock",
+      dashTodayProdLabel: "Today Production",
+      dashDefectLabel: "Outsourcing Defect Rate",
+      dashPurchase7Title: "Purchase (7 days)",
+      dashOutgoing7Title: "Outgoing (7 days)",
+      dashProduction7Title: "Production (7 days)",
       employeesTitle: "Employees",
       employeesDesc: "Employee master data.",
       attendanceTitle: "Attendance",
@@ -121,6 +128,13 @@ const i18n = {
       logsDesc: "시스템 작업 기록.",
       settingsTitle: "설정",
       settingsDesc: "기본 설정.",
+       dashRawLabel: "원자재 재고",
+      dashFinishedLabel: "완제품 재고",
+      dashTodayProdLabel: "오늘 생산량",
+      dashDefectLabel: "외주 불량률",
+      dashPurchase7Title: "입고 (7일)",
+      dashOutgoing7Title: "출고 (7일)",
+      dashProduction7Title: "생산 (7일)",
       employeesTitle: "직원 관리",
       employeesDesc: "직원 기본 정보.",
       attendanceTitle: "근태 관리",
@@ -173,6 +187,13 @@ const i18n = {
       logsDesc: "Riwayat aktivitas.",
       settingsTitle: "Pengaturan",
       settingsDesc: "Pengaturan dasar.",
+      dashRawLabel: "Stok Bahan Baku",
+      dashFinishedLabel: "Stok Barang Jadi",
+      dashTodayProdLabel: "Produksi Hari Ini",
+      dashDefectLabel: "Tingkat Cacat Outsourcing",
+      dashPurchase7Title: "Pembelian (7 hari)",
+      dashOutgoing7Title: "Pengeluaran (7 hari)",
+      dashProduction7Title: "Produksi (7 hari)",
       employeesTitle: "Karyawan",
       employeesDesc: "Data karyawan.",
       attendanceTitle: "Absensi",
@@ -1404,34 +1425,34 @@ const PageTemplates = {
 
       <div class="cards">
         <div class="card">
-          <div class="card-label">원자재 재고</div>
+          <div class="card-label">${t.dashRawLabel}</div>
           <div class="card-value" id="dashRaw">0</div>
         </div>
         <div class="card">
-          <div class="card-label">완제품 재고</div>
+          <div class="card-label">${t.dashFinishedLabel}</div>
           <div class="card-value" id="dashFinished">0</div>
         </div>
         <div class="card">
-          <div class="card-label">오늘 생산량</div>
+          <div class="card-label">${t.dashTodayProdLabel}</div>
           <div class="card-value" id="dashTodayProd">0</div>
         </div>
         <div class="card">
-          <div class="card-label">외주 불량률</div>
+          <div class="card-label">${t.dashDefectLabel}</div>
           <div class="card-value" id="dashDefect">0%</div>
         </div>
       </div>
 
       <div class="chart-grid">
         <div>
-          <h3>입고 (7일)</h3>
+          <h3>${t.dashPurchase7Title}</h3>
           <canvas id="chartPurchase"></canvas>
         </div>
         <div>
-          <h3>출고 (7일)</h3>
+          <h3>${t.dashOutgoing7Title}</h3>
           <canvas id="chartOutgoing"></canvas>
         </div>
         <div>
-          <h3>생산 (7일)</h3>
+          <h3>${t.dashProduction7Title}</h3>
           <canvas id="chartProduction"></canvas>
         </div>
       </div>
