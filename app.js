@@ -1,25 +1,29 @@
 /*************************************************
- * HTORI ERP – Frontend Single Page App
- * - 메뉴 클릭 시 content 영역에 페이지 렌더링
- * - EN / KR / ID 다국어 지원
+ * HTORI ERP – Frontend Single Page App (FULL VERSION)
+ * - Dashboard / Stock / Purchase / Outgoing
+ * - Production (BOM deduction)
+ * - BOM Management
+ * - Outsourcing (Out → In, defect, vendor select)
+ * - Stock / Purchase / Production 수정 가능
+ * - Multi Language (EN / KR / ID)
  *************************************************/
 
 /** 사용 가능한 언어 */
 const LANGS = ["EN", "KR", "ID"];
 
-/** 현재 상태 */
+/** 글로벌 상태 */
 const state = {
   lang: localStorage.getItem("htori_lang") || "EN",
   page: localStorage.getItem("htori_page") || "dashboard",
 };
 
-/** 번역 사전 */
+/*************************************************
+ * I18N – 다국어 사전
+ *************************************************/
+
 const i18n = {
   EN: {
     appTitle: "HTORI ERP",
-    welcomeTitle: "Welcome to HTORI ERP",
-    welcomeDesc: "Select a menu from the left.",
-
     sidebar: {
       dashboard: "Dashboard",
       stock: "Stock",
@@ -35,51 +39,56 @@ const i18n = {
       logs: "Logs",
       settings: "Settings",
     },
-
     pages: {
-      /* Dashboard */
       dashboardTitle: "Dashboard",
-      dashboardDesc: "Key indicators of factory operation (example).",
+      dashboardDesc: "Factory key indicators.",
 
-      /* Stock */
       stockTitle: "Stock",
-      stockDesc: "Raw / semi-finished material stock overview.",
+      stockDesc: "Current inventory.",
       stockCodeHeader: "Code",
       stockNameHeader: "Name",
       stockQtyHeader: "Qty",
       stockMinHeader: "Min",
       stockUnitHeader: "Unit",
-      stockUpdatedHeader: "Last Updated",
+      stockUpdatedHeader: "Updated",
+      stockEditHeader: "Edit",
 
-      /* Purchase */
       purchaseTitle: "Purchase",
-      purchaseDesc: "Incoming materials from suppliers.",
+      purchaseDesc: "Incoming material records.",
       purchaseFormCodePlaceholder: "Material Code",
       purchaseFormNamePlaceholder: "Material Name",
       purchaseFormQtyPlaceholder: "Qty",
       purchaseFormButton: "Register Incoming",
+      purchaseTableDate: "Date",
+      purchaseTableCode: "Code",
+      purchaseTableName: "Name",
+      purchaseTableQty: "Qty",
+      purchaseTableUpdated: "Updated",
+      purchaseTableEdit: "Edit",
 
-      /* Outgoing */
       outgoingTitle: "Outgoing",
-      outgoingDesc: "Manual material outgoing / adjustment.",
+      outgoingDesc: "Material outgoing.",
       outgoingFormCodePlaceholder: "Material Code",
       outgoingFormNamePlaceholder: "Material Name",
       outgoingFormQtyPlaceholder: "Qty",
       outgoingFormButton: "Register Outgoing",
 
-      /* Production */
       productionTitle: "Production",
-      productionDesc: "Daily production result and material usage.",
+      productionDesc: "Daily production results.",
       prodProductPlaceholder: "Finished Product (same as BOM product)",
-      prodQtyPlaceholder: "Production Qty",
+      prodQtyPlaceholder: "Qty",
       prodButton: "Register Production",
       prodNote:
-        "Please input the same Product value as in BOM to deduct materials automatically.",
+        "Product must match BOM to deduct raw materials automatically.",
+      prodTableDate: "Date",
+      prodTableProduct: "Product",
+      prodTableQty: "Qty",
+      prodTableUpdated: "Updated",
+      prodTableEdit: "Edit",
 
-      /* BOM */
-      bomTitle: "BOM (Bill of Materials)",
-      bomDesc: "Link finished products with required raw materials.",
-      bomProductPlaceholder: "Finished Product (e.g. VC100-SET)",
+      bomTitle: "BOM",
+      bomDesc: "Bill of Materials.",
+      bomProductPlaceholder: "Finished Product",
       bomMatCodePlaceholder: "Material Code",
       bomMatNamePlaceholder: "Material Name",
       bomQtyPlaceholder: "Qty per 1 product",
@@ -90,35 +99,39 @@ const i18n = {
       bomTableQty: "Qty",
       bomTableUpdated: "Updated",
 
-      /* Outsourcing */
       outsourcingTitle: "Outsourcing",
-      outsourcingDesc:
-        "Semi-process sent to external vendors. (Screen prototype only)",
+      outsourcingDesc: "Out → In code change with defect tracking.",
+      outsourcingFormVendorPlaceholder: "Vendor",
+      outsourcingFormButton: "Register Outsourcing",
+      outsourcingTableDate: "Date",
+      outsourcingTableOutCode: "Out Code",
+      outsourcingTableOutName: "Out Name",
+      outsourcingTableQtyOut: "Qty Out",
+      outsourcingTableInCode: "In Code",
+      outsourcingTableInName: "In Name",
+      outsourcingTableQtyIn: "Qty In",
+      outsourcingTableDefect: "Defect",
+      outsourcingTableVendor: "Vendor",
+      outsourcingTableUpdated: "Updated",
 
-      /* Finished Goods */
       finishedTitle: "Finished Goods",
-      finishedDesc: "Finished products ready for shipment. (Screen prototype)",
+      finishedDesc: "Finished products (demo).",
 
-      /* Employees */
       employeesTitle: "Employees",
-      employeesDesc: "Employee master data. (Screen prototype)",
+      employeesDesc: "Employee master (demo).",
 
-      /* Attendance */
       attendanceTitle: "Attendance",
-      attendanceDesc: "Clock-in / clock-out records. (Screen prototype)",
+      attendanceDesc: "Attendance records (demo).",
 
-      /* Payroll */
       payrollTitle: "Payroll",
-      payrollDesc: "Monthly salary calculation overview. (Screen prototype)",
+      payrollDesc: "Payroll overview (demo).",
 
-      /* Logs */
       logsTitle: "Logs",
-      logsDesc: "System activity log (examples).",
+      logsDesc: "System logs (demo).",
 
-      /* Settings */
       settingsTitle: "Settings",
-      settingsDesc: "ERP basic settings.",
-      settingsLangLabel: "Default Language",
+      settingsDesc: "System configuration",
+      settingsLangLabel: "Language",
       settingsTimezoneLabel: "Timezone",
       settingsVersionLabel: "Version",
     },
@@ -126,17 +139,14 @@ const i18n = {
 
   KR: {
     appTitle: "HTORI ERP",
-    welcomeTitle: "HTORI ERP 에 오신 것을 환영합니다",
-    welcomeDesc: "왼쪽 메뉴를 선택하세요.",
-
     sidebar: {
       dashboard: "대시보드",
       stock: "재고",
-      purchase: "입고(Purchase)",
-      outgoing: "출고(Outgoing)",
-      production: "생산(Production)",
-      bom: "BOM (자재명세)",
-      outsourcing: "외주(Outsourcing)",
+      purchase: "입고",
+      outgoing: "출고",
+      production: "생산",
+      bom: "BOM",
+      outsourcing: "외주",
       finished: "완제품",
       employees: "직원",
       attendance: "근태",
@@ -144,13 +154,10 @@ const i18n = {
       logs: "로그",
       settings: "설정",
     },
-
     pages: {
-      /* Dashboard */
       dashboardTitle: "대시보드",
-      dashboardDesc: "공장 운영 핵심 지표 (예시 화면).",
+      dashboardDesc: "공장 운영 핵심 지표.",
 
-      /* Stock */
       stockTitle: "재고 관리",
       stockDesc: "원자재 / 반제품 재고 현황.",
       stockCodeHeader: "코드",
@@ -159,36 +166,44 @@ const i18n = {
       stockMinHeader: "안전재고",
       stockUnitHeader: "단위",
       stockUpdatedHeader: "최종 수정",
+      stockEditHeader: "수정",
 
-      /* Purchase */
       purchaseTitle: "입고 관리",
-      purchaseDesc: "공급처에서 들어온 자재 입고 내역.",
+      purchaseDesc: "입고 내역.",
       purchaseFormCodePlaceholder: "자재 코드",
       purchaseFormNamePlaceholder: "자재 명",
       purchaseFormQtyPlaceholder: "입고 수량",
       purchaseFormButton: "입고 등록",
+      purchaseTableDate: "날짜",
+      purchaseTableCode: "코드",
+      purchaseTableName: "품명",
+      purchaseTableQty: "수량",
+      purchaseTableUpdated: "수정일",
+      purchaseTableEdit: "수정",
 
-      /* Outgoing */
       outgoingTitle: "출고 관리",
-      outgoingDesc: "자재 출고 / 조정 내역.",
+      outgoingDesc: "출고 / 조정 내역.",
       outgoingFormCodePlaceholder: "자재 코드",
       outgoingFormNamePlaceholder: "자재 명",
       outgoingFormQtyPlaceholder: "출고 수량",
       outgoingFormButton: "출고 등록",
 
-      /* Production */
       productionTitle: "생산 관리",
-      productionDesc: "일일 생산량 및 자재 사용 내역.",
-      prodProductPlaceholder: "완제품 코드 (BOM Product와 동일)",
+      productionDesc: "일일 생산량 및 자재 사용.",
+      prodProductPlaceholder: "완제품 코드 (BOM과 동일)",
       prodQtyPlaceholder: "생산 수량",
       prodButton: "생산 등록",
       prodNote:
-        "※ BOM에 등록된 product 값과 동일한 값을 입력해야 원자재 자동 차감이 됩니다.",
+        "※ BOM에 등록된 product 값과 동일해야 원자재 자동 차감됩니다.",
+      prodTableDate: "날짜",
+      prodTableProduct: "제품",
+      prodTableQty: "수량",
+      prodTableUpdated: "수정일",
+      prodTableEdit: "수정",
 
-      /* BOM */
       bomTitle: "BOM (자재명세서)",
       bomDesc: "완제품과 필요 원자재를 연결합니다.",
-      bomProductPlaceholder: "완제품 코드 (예: VC100-SET)",
+      bomProductPlaceholder: "완제품 코드",
       bomMatCodePlaceholder: "자재 코드",
       bomMatNamePlaceholder: "자재 명",
       bomQtyPlaceholder: "완제품 1개당 필요 수량",
@@ -199,34 +214,39 @@ const i18n = {
       bomTableQty: "수량",
       bomTableUpdated: "수정일",
 
-      /* Outsourcing */
       outsourcingTitle: "외주 관리",
-      outsourcingDesc: "외주업체로 나갔다 들어온 반제품 관리 (예시 화면).",
+      outsourcingDesc: "단순 작업 외주 (출고/입고/불량 기록).",
+      outsourcingFormVendorPlaceholder: "외주 업체",
+      outsourcingFormButton: "외주 등록",
+      outsourcingTableDate: "날짜",
+      outsourcingTableOutCode: "OUT 코드",
+      outsourcingTableOutName: "OUT 품명",
+      outsourcingTableQtyOut: "출고 수량",
+      outsourcingTableInCode: "IN 코드",
+      outsourcingTableInName: "IN 품명",
+      outsourcingTableQtyIn: "입고 수량",
+      outsourcingTableDefect: "불량",
+      outsourcingTableVendor: "외주 업체",
+      outsourcingTableUpdated: "등록일",
 
-      /* Finished Goods */
       finishedTitle: "완제품 재고",
-      finishedDesc: "출고 가능한 완제품 재고 (예시 화면).",
+      finishedDesc: "출고 가능한 완제품 (예시 화면).",
 
-      /* Employees */
       employeesTitle: "직원 관리",
-      employeesDesc: "직원 기본 정보 (예시 화면).",
+      employeesDesc: "직원 정보 (예시 화면).",
 
-      /* Attendance */
       attendanceTitle: "근태 관리",
-      attendanceDesc: "출근 / 퇴근 기록 (예시 화면).",
+      attendanceDesc: "출근/퇴근 기록 (예시 화면).",
 
-      /* Payroll */
       payrollTitle: "급여 관리",
-      payrollDesc: "월별 급여 계산 현황 (예시 화면).",
+      payrollDesc: "급여 현황 (예시 화면).",
 
-      /* Logs */
       logsTitle: "로그",
-      logsDesc: "시스템 작업 기록 (예시).",
+      logsDesc: "시스템 로그 (예시).",
 
-      /* Settings */
       settingsTitle: "설정",
-      settingsDesc: "ERP 기본 환경 설정.",
-      settingsLangLabel: "기본 언어",
+      settingsDesc: "시스템 기본 설정.",
+      settingsLangLabel: "언어",
       settingsTimezoneLabel: "타임존",
       settingsVersionLabel: "버전",
     },
@@ -234,9 +254,6 @@ const i18n = {
 
   ID: {
     appTitle: "HTORI ERP",
-    welcomeTitle: "Selamat datang di HTORI ERP",
-    welcomeDesc: "Silakan pilih menu di sebelah kiri.",
-
     sidebar: {
       dashboard: "Dashboard",
       stock: "Stok",
@@ -252,51 +269,56 @@ const i18n = {
       logs: "Log",
       settings: "Pengaturan",
     },
-
     pages: {
-      /* Dashboard */
       dashboardTitle: "Dashboard",
-      dashboardDesc: "Indikator utama operasi pabrik (contoh).",
+      dashboardDesc: "Indikator utama pabrik.",
 
-      /* Stock */
       stockTitle: "Stok",
-      stockDesc: "Ringkasan stok bahan baku / semi jadi.",
+      stockDesc: "Stok bahan baku / semi jadi.",
       stockCodeHeader: "Kode",
       stockNameHeader: "Nama",
       stockQtyHeader: "Qty",
       stockMinHeader: "Min",
       stockUnitHeader: "Unit",
-      stockUpdatedHeader: "Update Terakhir",
+      stockUpdatedHeader: "Update",
+      stockEditHeader: "Edit",
 
-      /* Purchase */
       purchaseTitle: "Pembelian",
-      purchaseDesc: "Data bahan masuk dari supplier.",
+      purchaseDesc: "Data bahan masuk.",
       purchaseFormCodePlaceholder: "Kode Bahan",
       purchaseFormNamePlaceholder: "Nama Bahan",
       purchaseFormQtyPlaceholder: "Qty",
       purchaseFormButton: "Input Pembelian",
+      purchaseTableDate: "Tanggal",
+      purchaseTableCode: "Kode",
+      purchaseTableName: "Nama",
+      purchaseTableQty: "Qty",
+      purchaseTableUpdated: "Update",
+      purchaseTableEdit: "Edit",
 
-      /* Outgoing */
       outgoingTitle: "Pengeluaran",
-      outgoingDesc: "Bahan keluar / penyesuaian manual.",
+      outgoingDesc: "Bahan keluar.",
       outgoingFormCodePlaceholder: "Kode Bahan",
       outgoingFormNamePlaceholder: "Nama Bahan",
       outgoingFormQtyPlaceholder: "Qty",
       outgoingFormButton: "Input Pengeluaran",
 
-      /* Production */
       productionTitle: "Produksi",
-      productionDesc: "Hasil produksi harian dan pemakaian bahan.",
-      prodProductPlaceholder: "Produk Jadi (sama dengan Product di BOM)",
-      prodQtyPlaceholder: "Qty Produksi",
+      productionDesc: "Hasil produksi harian.",
+      prodProductPlaceholder: "Produk Jadi (sama dengan BOM)",
+      prodQtyPlaceholder: "Qty",
       prodButton: "Input Produksi",
       prodNote:
-        "Isi Product sama seperti di BOM agar pemakaian bahan otomatis dipotong.",
+        "Product harus sama dengan di BOM agar pemakaian bahan otomatis dipotong.",
+      prodTableDate: "Tanggal",
+      prodTableProduct: "Produk",
+      prodTableQty: "Qty",
+      prodTableUpdated: "Update",
+      prodTableEdit: "Edit",
 
-      /* BOM */
-      bomTitle: "BOM (Bill of Materials)",
-      bomDesc: "Hubungkan produk jadi dengan bahan baku.",
-      bomProductPlaceholder: "Produk Jadi (mis: VC100-SET)",
+      bomTitle: "BOM",
+      bomDesc: "Bill of Materials.",
+      bomProductPlaceholder: "Produk Jadi",
       bomMatCodePlaceholder: "Kode Bahan",
       bomMatNamePlaceholder: "Nama Bahan",
       bomQtyPlaceholder: "Qty per 1 produk",
@@ -307,35 +329,39 @@ const i18n = {
       bomTableQty: "Qty",
       bomTableUpdated: "Update",
 
-      /* Outsourcing */
       outsourcingTitle: "Outsourcing",
-      outsourcingDesc:
-        "Proses yang dikirim ke vendor luar (tampilan contoh).",
+      outsourcingDesc: "Proses ke vendor luar, dengan defect.",
+      outsourcingFormVendorPlaceholder: "Vendor",
+      outsourcingFormButton: "Input Outsourcing",
+      outsourcingTableDate: "Tanggal",
+      outsourcingTableOutCode: "Out Code",
+      outsourcingTableOutName: "Out Name",
+      outsourcingTableQtyOut: "Qty Out",
+      outsourcingTableInCode: "In Code",
+      outsourcingTableInName: "In Name",
+      outsourcingTableQtyIn: "Qty In",
+      outsourcingTableDefect: "Defect",
+      outsourcingTableVendor: "Vendor",
+      outsourcingTableUpdated: "Update",
 
-      /* Finished Goods */
       finishedTitle: "Barang Jadi",
-      finishedDesc: "Barang jadi siap dikirim (tampilan contoh).",
+      finishedDesc: "Barang jadi (contoh).",
 
-      /* Employees */
       employeesTitle: "Karyawan",
-      employeesDesc: "Data master karyawan (tampilan contoh).",
+      employeesDesc: "Data karyawan (contoh).",
 
-      /* Attendance */
       attendanceTitle: "Absensi",
-      attendanceDesc: "Data clock-in / clock-out (tampilan contoh).",
+      attendanceDesc: "Data absensi (contoh).",
 
-      /* Payroll */
       payrollTitle: "Gaji",
-      payrollDesc: "Ringkasan perhitungan gaji bulanan (tampilan contoh).",
+      payrollDesc: "Ringkasan gaji (contoh).",
 
-      /* Logs */
       logsTitle: "Log",
-      logsDesc: "Riwayat aktivitas sistem (contoh).",
+      logsDesc: "Riwayat sistem (contoh).",
 
-      /* Settings */
       settingsTitle: "Pengaturan",
       settingsDesc: "Pengaturan dasar ERP.",
-      settingsLangLabel: "Bahasa Default",
+      settingsLangLabel: "Bahasa",
       settingsTimezoneLabel: "Zona Waktu",
       settingsVersionLabel: "Versi",
     },
@@ -387,6 +413,7 @@ const PageTemplates = {
             <th>${t.stockMinHeader}</th>
             <th>${t.stockUnitHeader}</th>
             <th>${t.stockUpdatedHeader}</th>
+            <th>${t.stockEditHeader}</th>
           </tr>
         </thead>
         <tbody id="stockTableBody"></tbody>
@@ -408,6 +435,20 @@ const PageTemplates = {
           ${t.purchaseFormButton}
         </button>
       </div>
+
+      <table class="erp-table" style="margin-top:20px;">
+        <thead>
+          <tr>
+            <th>${t.purchaseTableDate}</th>
+            <th>${t.purchaseTableCode}</th>
+            <th>${t.purchaseTableName}</th>
+            <th>${t.purchaseTableQty}</th>
+            <th>${t.purchaseTableUpdated}</th>
+            <th>${t.purchaseTableEdit}</th>
+          </tr>
+        </thead>
+        <tbody id="purchaseTableBody"></tbody>
+      </table>
     `;
   },
 
@@ -445,6 +486,19 @@ const PageTemplates = {
       <p style="font-size: 12px; opacity: 0.7; margin-top: 8px;">
         ${t.prodNote}
       </p>
+
+      <table class="erp-table" style="margin-top:20px;">
+        <thead>
+          <tr>
+            <th>${t.prodTableDate}</th>
+            <th>${t.prodTableProduct}</th>
+            <th>${t.prodTableQty}</th>
+            <th>${t.prodTableUpdated}</th>
+            <th>${t.prodTableEdit}</th>
+          </tr>
+        </thead>
+        <tbody id="prodTableBody"></tbody>
+      </table>
     `;
   },
 
@@ -481,52 +535,74 @@ const PageTemplates = {
 
   outsourcing(lang) {
     const t = i18n[lang].pages;
+    const vendors = getVendors();
+
     return `
       <h2>${t.outsourcingTitle}</h2>
       <p>${t.outsourcingDesc}</p>
+
+      <div class="form-row">
+
+        <h3>OUT</h3>
+        <input id="outCode" placeholder="${t.outsourcingTableOutCode}">
+        <input id="outName" placeholder="${t.outsourcingTableOutName}">
+        <input id="outQty" type="number" placeholder="${t.outsourcingTableQtyOut}">
+
+        <h3 style="margin-top:20px;">IN</h3>
+        <input id="inCode" placeholder="${t.outsourcingTableInCode}">
+        <input id="inName" placeholder="${t.outsourcingTableInName}">
+        <input id="inQty" type="number" placeholder="${t.outsourcingTableQtyIn}">
+
+        <h3 style="margin-top:20px;">Vendor</h3>
+        <select id="outVendor">
+          ${vendors.map(v => `<option value="${v}">${v}</option>`).join("")}
+        </select>
+
+        <button onclick="onOutsourcing()" class="btn-primary" style="margin-top:20px;">
+          ${t.outsourcingFormButton}
+        </button>
+      </div>
+
+      <table class="erp-table" style="margin-top:20px;">
+        <thead>
+          <tr>
+            <th>${t.outsourcingTableDate}</th>
+            <th>${t.outsourcingTableOutCode}</th>
+            <th>${t.outsourcingTableOutName}</th>
+            <th>${t.outsourcingTableQtyOut}</th>
+            <th>${t.outsourcingTableInCode}</th>
+            <th>${t.outsourcingTableInName}</th>
+            <th>${t.outsourcingTableQtyIn}</th>
+            <th>${t.outsourcingTableDefect}</th>
+            <th>${t.outsourcingTableVendor}</th>
+            <th>${t.outsourcingTableUpdated}</th>
+          </tr>
+        </thead>
+        <tbody id="outsourcingTableBody"></tbody>
+      </table>
     `;
   },
 
   finished(lang) {
     const t = i18n[lang].pages;
-    return `
-      <h2>${t.finishedTitle}</h2>
-      <p>${t.finishedDesc}</p>
-    `;
+    return `<h2>${t.finishedTitle}</h2><p>${t.finishedDesc}</p>`;
   },
-
   employees(lang) {
     const t = i18n[lang].pages;
-    return `
-      <h2>${t.employeesTitle}</h2>
-      <p>${t.employeesDesc}</p>
-    `;
+    return `<h2>${t.employeesTitle}</h2><p>${t.employeesDesc}</p>`;
   },
-
   attendance(lang) {
     const t = i18n[lang].pages;
-    return `
-      <h2>${t.attendanceTitle}</h2>
-      <p>${t.attendanceDesc}</p>
-    `;
+    return `<h2>${t.attendanceTitle}</h2><p>${t.attendanceDesc}</p>`;
   },
-
   payroll(lang) {
     const t = i18n[lang].pages;
-    return `
-      <h2>${t.payrollTitle}</h2>
-      <p>${t.payrollDesc}</p>
-    `;
+    return `<h2>${t.payrollTitle}</h2><p>${t.payrollDesc}</p>`;
   },
-
   logs(lang) {
     const t = i18n[lang].pages;
-    return `
-      <h2>${t.logsTitle}</h2>
-      <p>${t.logsDesc}</p>
-    `;
+    return `<h2>${t.logsTitle}</h2><p>${t.logsDesc}</p>`;
   },
-
   settings(lang) {
     const t = i18n[lang].pages;
     return `
@@ -548,7 +624,7 @@ const PageTemplates = {
         </div>
         <div class="settings-item">
           <label>${t.settingsVersionLabel}</label>
-          <input type="text" value="0.3 (Prototype)" disabled />
+          <input type="text" value="0.4 (Full Prototype)" disabled />
         </div>
       </div>
     `;
@@ -567,11 +643,16 @@ function renderContent() {
   const tmpl = PageTemplates[page] || PageTemplates.dashboard;
   contentEl.innerHTML = tmpl(lang);
 
-  // 페이지별 추가 렌더링 로직
   if (page === "stock") {
     renderStockPage();
   } else if (page === "bom") {
     loadBOM();
+  } else if (page === "outsourcing") {
+    renderOutsourcingPage();
+  } else if (page === "purchase") {
+    renderPurchasePage();
+  } else if (page === "production") {
+    renderProductionPage();
   }
 }
 
@@ -583,16 +664,13 @@ function renderSidebar() {
     const pageId = MENU_ORDER[idx];
     li.dataset.page = pageId;
     li.textContent = t[pageId];
-
     li.classList.toggle("active", pageId === state.page);
   });
 }
 
 function renderHeader() {
   const logoEl = document.querySelector(".logo");
-  if (logoEl) {
-    logoEl.textContent = i18n[state.lang].appTitle;
-  }
+  if (logoEl) logoEl.textContent = i18n[state.lang].appTitle;
 }
 
 function rerenderAll() {
@@ -602,7 +680,7 @@ function rerenderAll() {
 }
 
 /*************************************************
- * PAGE CHANGE / LANGUAGE CHANGE
+ * PAGE / LANGUAGE
  *************************************************/
 
 function setLanguage(lang) {
@@ -623,12 +701,11 @@ function loadPage(pageId) {
  * INITIAL
  *************************************************/
 document.addEventListener("DOMContentLoaded", rerenderAll);
-
 window.setLanguage = setLanguage;
 window.loadPage = loadPage;
 
 /*************************************************
- * STOCK MODULE (입고/출고)
+ * STOCK MODULE
  *************************************************/
 
 function getStock() {
@@ -638,14 +715,11 @@ function saveStock(stock) {
   localStorage.setItem("stock", JSON.stringify(stock));
 }
 
-/* 입고 */
-function updateStock(code, name, qty) {
+/* 재고 증가 (입고 / 기타) – 화면 전환 없음 */
+function increaseStock(code, name, qty) {
   let stock = getStock();
   qty = Number(qty);
-  if (!qty || qty <= 0) {
-    alert("수량을 확인하세요.");
-    return;
-  }
+  if (!qty || qty <= 0) return;
 
   let item = stock.find((i) => i.code === code);
   const now = new Date().toLocaleString();
@@ -663,40 +737,26 @@ function updateStock(code, name, qty) {
       lastUpdate: now,
     });
   }
-
   saveStock(stock);
-  alert("입고 완료!");
-  loadPage("stock");
 }
 
-/* 출고 */
-function outgoingStock(code, name, qty) {
+/* 재고 감소 (출고 / 생산 / 외주) – 화면 전환 없음 */
+function decreaseStock(code, qty) {
   let stock = getStock();
   qty = Number(qty);
-  if (!qty || qty <= 0) {
-    alert("수량을 확인하세요.");
-    return;
-  }
+  if (!qty || qty <= 0) return false;
 
   let item = stock.find((i) => i.code === code);
-  if (!item) {
-    alert("해당 코드의 재고가 없습니다.");
-    return;
-  }
-  if (item.qty < qty) {
-    alert("재고 부족! 현재 재고: " + item.qty);
-    return;
-  }
+  if (!item) return false;
+  if (item.qty < qty) return false;
 
   item.qty -= qty;
   item.lastUpdate = new Date().toLocaleString();
-
   saveStock(stock);
-  alert("출고 완료!");
-  loadPage("stock");
+  return true;
 }
 
-/* PURCHASE → 버튼 */
+/* 입고 버튼 */
 function onPurchase() {
   const code = document.getElementById("pCode").value.trim();
   const name = document.getElementById("pName").value.trim();
@@ -707,24 +767,51 @@ function onPurchase() {
     return;
   }
 
-  updateStock(code, name, qty);
+  // 1) 재고 반영
+  increaseStock(code, name, qty);
+
+  // 2) Purchase 기록 저장
+  let list = getPurchase();
+  list.push({
+    date: new Date().toLocaleDateString(),
+    code,
+    name,
+    qty: Number(qty),
+    updated: new Date().toLocaleString(),
+  });
+  savePurchase(list);
+
+  alert("입고 완료!");
+  loadPage("purchase");
 }
 
-/* OUTGOING → 버튼 */
+/* 출고 버튼 */
 function onOutgoing() {
   const code = document.getElementById("oCode").value.trim();
   const name = document.getElementById("oName").value.trim();
   const qty = document.getElementById("oQty").value.trim();
+  const nQty = Number(qty);
 
   if (!code || !name || !qty) {
     alert("모든 값을 입력하세요.");
     return;
   }
+  if (nQty <= 0 || isNaN(nQty)) {
+    alert("수량을 확인하세요.");
+    return;
+  }
 
-  outgoingStock(code, name, qty);
+  const ok = decreaseStock(code, nQty);
+  if (!ok) {
+    alert("재고 부족 또는 코드 없음.");
+    return;
+  }
+
+  alert("출고 완료!");
+  loadPage("outgoing");
 }
 
-/* STOCK PAGE RENDER */
+/* STOCK 페이지 렌더 */
 function renderStockPage() {
   const tbody = document.getElementById("stockTableBody");
   if (!tbody) return;
@@ -740,9 +827,103 @@ function renderStockPage() {
         <td>${i.minQty}</td>
         <td>${i.unit}</td>
         <td>${i.lastUpdate || ""}</td>
+        <td><button class="btn-mini" onclick="editStockQty('${i.code}')">수정</button></td>
       </tr>
     `;
   });
+}
+
+/* STOCK 수량 수정 */
+function editStockQty(code) {
+  let stock = getStock();
+  let item = stock.find((i) => i.code === code);
+  if (!item) return alert("재고를 찾을 수 없습니다.");
+
+  const newQty = prompt("새 수량:", item.qty);
+  if (newQty === null) return;
+  const n = Number(newQty);
+  if (isNaN(n) || n < 0) {
+    alert("수량이 올바르지 않습니다.");
+    return;
+  }
+
+  item.qty = n;
+  item.lastUpdate = new Date().toLocaleString();
+  saveStock(stock);
+  alert("재고 수정 완료!");
+  loadPage("stock");
+}
+
+/*************************************************
+ * PURCHASE MODULE (기록 + 수정)
+ *************************************************/
+
+function getPurchase() {
+  return JSON.parse(localStorage.getItem("purchase") || "[]");
+}
+function savePurchase(list) {
+  localStorage.setItem("purchase", JSON.stringify(list));
+}
+
+function renderPurchasePage() {
+  const tbody = document.getElementById("purchaseTableBody");
+  if (!tbody) return;
+
+  const list = getPurchase();
+  tbody.innerHTML = "";
+  list.forEach((p, idx) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${p.date}</td>
+        <td>${p.code}</td>
+        <td>${p.name}</td>
+        <td>${p.qty}</td>
+        <td>${p.updated}</td>
+        <td><button class="btn-mini" onclick="editPurchase(${idx})">수정</button></td>
+      </tr>
+    `;
+  });
+}
+
+/* PURCHASE 수정 (차액만큼 재고 반영) */
+function editPurchase(index) {
+  let list = getPurchase();
+  let p = list[index];
+  if (!p) return;
+
+  const newQtyStr = prompt("새 입고 수량:", p.qty);
+  if (newQtyStr === null) return;
+  const n = Number(newQtyStr);
+  if (isNaN(n) || n <= 0) {
+    alert("수량이 올바르지 않습니다.");
+    return;
+  }
+
+  const diff = n - p.qty; // +면 재고 증가, -면 감소
+  let stock = getStock();
+  let item = stock.find((i) => i.code === p.code);
+  if (!item && diff < 0) {
+    alert("재고 데이터가 없어 감소 처리 불가.");
+    return;
+  }
+  if (!item && diff > 0) {
+    increaseStock(p.code, p.name, diff);
+  } else if (item) {
+    if (item.qty + diff < 0) {
+      alert("수정 시 재고가 음수가 됩니다.");
+      return;
+    }
+    item.qty += diff;
+    item.lastUpdate = new Date().toLocaleString();
+    saveStock(stock);
+  }
+
+  p.qty = n;
+  p.updated = new Date().toLocaleString();
+  savePurchase(list);
+
+  alert("Purchase 수정 완료!");
+  loadPage("purchase");
 }
 
 /*************************************************
@@ -764,7 +945,7 @@ function saveBOM() {
   const qty = Number(qtyVal);
 
   if (!product || !matCode || !matName || !qtyVal || !qty || qty <= 0) {
-    alert("BOM 정보를 정확히 입력해주세요.");
+    alert("BOM 정보를 정확히 입력하세요.");
     return;
   }
 
@@ -802,7 +983,7 @@ function loadBOM() {
 }
 
 /*************************************************
- * PRODUCTION MODULE (BOM 기반 자동 차감)
+ * PRODUCTION MODULE (BOM 기반 + 기록/수정)
  *************************************************/
 
 function getBomForProduct(productKey) {
@@ -810,27 +991,33 @@ function getBomForProduct(productKey) {
   return bom.filter((i) => i.product === productKey);
 }
 
+function getProduction() {
+  return JSON.parse(localStorage.getItem("production") || "[]");
+}
+function saveProduction(list) {
+  localStorage.setItem("production", JSON.stringify(list));
+}
+
+/* 생산 시 원자재 차감 (새 생산) */
 function runProduction(productKey, qtyVal) {
   const qty = Number(qtyVal);
   if (!productKey || !qtyVal || !qty || qty <= 0) {
-    alert("제품과 수량을 정확히 입력하세요.");
-    return;
+    alert("제품과 수량을 확인하세요.");
+    return false;
   }
 
   const bomList = getBomForProduct(productKey);
   if (bomList.length === 0) {
-    alert("BOM에 해당 제품 정보가 없습니다.");
-    return;
+    alert("BOM에 제품 정보가 없습니다.");
+    return false;
   }
 
   let stock = getStock();
   let errors = [];
 
-  // 1) 재고 부족 체크
   bomList.forEach((b) => {
     const need = b.qty * qty;
     const mat = stock.find((s) => s.code === b.matCode);
-
     if (!mat) {
       errors.push(`${b.matCode} (${b.matName}) 재고 없음`);
     } else if (mat.qty < need) {
@@ -842,10 +1029,9 @@ function runProduction(productKey, qtyVal) {
 
   if (errors.length > 0) {
     alert("생산 불가 (재고 부족):\n" + errors.join("\n"));
-    return;
+    return false;
   }
 
-  // 2) 재고 차감 실행
   bomList.forEach((b) => {
     const need = b.qty * qty;
     const mat = stock.find((s) => s.code === b.matCode);
@@ -854,12 +1040,263 @@ function runProduction(productKey, qtyVal) {
   });
 
   saveStock(stock);
-  alert("생산 등록 완료! (BOM 기반 원자재 차감 완료)");
-  loadPage("stock");
+  return true;
 }
 
+/* 생산 등록 버튼 */
 function onProduction() {
   const product = document.getElementById("prodProduct").value.trim();
-  const qty = document.getElementById("prodQty").value.trim();
-  runProduction(product, qty);
+  const qtyVal = document.getElementById("prodQty").value.trim();
+  const qty = Number(qtyVal);
+
+  if (!product || !qtyVal) {
+    alert("모두 입력하세요.");
+    return;
+  }
+
+  const ok = runProduction(product, qtyVal);
+  if (!ok) return;
+
+  // 생산 기록 저장
+  let list = getProduction();
+  list.push({
+    date: new Date().toLocaleDateString(),
+    product,
+    qty,
+    updated: new Date().toLocaleString(),
+  });
+  saveProduction(list);
+
+  alert("생산 등록 완료!");
+  loadPage("production");
+}
+
+/* Production 렌더 */
+function renderProductionPage() {
+  const tbody = document.getElementById("prodTableBody");
+  if (!tbody) return;
+
+  const list = getProduction();
+  tbody.innerHTML = "";
+  list.forEach((p, idx) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${p.date}</td>
+        <td>${p.product}</td>
+        <td>${p.qty}</td>
+        <td>${p.updated}</td>
+        <td><button class="btn-mini" onclick="editProduction(${idx})">수정</button></td>
+      </tr>
+    `;
+  });
+}
+
+/* 생산 기록 수정 (차액만큼 BOM 기반 재조정) */
+function editProduction(index) {
+  let list = getProduction();
+  let p = list[index];
+  if (!p) return;
+
+  const newQtyStr = prompt("새 생산 수량:", p.qty);
+  if (newQtyStr === null) return;
+  const n = Number(newQtyStr);
+  if (isNaN(n) || n <= 0) {
+    alert("수량이 올바르지 않습니다.");
+    return;
+  }
+
+  const diff = n - p.qty; // +면 추가 생산, -면 감소(되돌리기)
+  const bomList = getBomForProduct(p.product);
+  if (bomList.length === 0) {
+    alert("BOM이 없어 수정 불가.");
+    return;
+  }
+
+  let stock = getStock();
+  if (diff > 0) {
+    // 추가 생산 → 원자재 추가 차감 필요
+    let errors = [];
+    bomList.forEach((b) => {
+      const need = b.qty * diff;
+      const mat = stock.find((s) => s.code === b.matCode);
+      if (!mat || mat.qty < need) {
+        errors.push(
+          `${b.matCode} (${b.matName}) 부족: 필요 ${need}, 현재 ${mat ? mat.qty : 0}`
+        );
+      }
+    });
+    if (errors.length > 0) {
+      alert("생산 수정 불가 (재고 부족):\n" + errors.join("\n"));
+      return;
+    }
+    bomList.forEach((b) => {
+      const need = b.qty * diff;
+      const mat = stock.find((s) => s.code === b.matCode);
+      mat.qty -= need;
+      mat.lastUpdate = new Date().toLocaleString();
+    });
+  } else if (diff < 0) {
+    // 생산량 감소 → 사용했던 원자재 일부 복원
+    bomList.forEach((b) => {
+      const back = b.qty * (-diff);
+      let mat = stock.find((s) => s.code === b.matCode);
+      if (!mat) {
+        mat = {
+          code: b.matCode,
+          name: b.matName,
+          qty: 0,
+          minQty: 0,
+          unit: "SET",
+        };
+        stock.push(mat);
+      }
+      mat.qty += back;
+      mat.lastUpdate = new Date().toLocaleString();
+    });
+  }
+
+  saveStock(stock);
+
+  p.qty = n;
+  p.updated = new Date().toLocaleString();
+  saveProduction(list);
+
+  alert("생산 수정 완료!");
+  loadPage("production");
+}
+
+/*************************************************
+ * VENDOR MODULE
+ *************************************************/
+
+function getVendors() {
+  return JSON.parse(localStorage.getItem("vendors") || "[]");
+}
+function saveVendors(list) {
+  localStorage.setItem("vendors", JSON.stringify(list));
+}
+function initVendors() {
+  let v = getVendors();
+  if (v.length === 0) {
+    v = ["Vendor A", "Vendor B", "Vendor C"];
+    saveVendors(v);
+  }
+}
+initVendors();
+
+/*************************************************
+ * OUTSOURCING MODULE (Out Code → In Code)
+ *************************************************/
+
+function getOutsourcing() {
+  return JSON.parse(localStorage.getItem("outsourcing") || "[]");
+}
+function saveOutsourcingData(list) {
+  localStorage.setItem("outsourcing", JSON.stringify(list));
+}
+
+function onOutsourcing() {
+  const outCode = document.getElementById("outCode").value.trim();
+  const outName = document.getElementById("outName").value.trim();
+  const outQty = Number(document.getElementById("outQty").value.trim());
+
+  const inCode = document.getElementById("inCode").value.trim();
+  const inName = document.getElementById("inName").value.trim();
+  const inQty = Number(document.getElementById("inQty").value.trim());
+
+  const vendor = document.getElementById("outVendor").value.trim();
+
+  if (
+    !outCode ||
+    !outName ||
+    !outQty ||
+    !inCode ||
+    !inName ||
+    !inQty ||
+    !vendor
+  ) {
+    alert("모든 값을 입력하세요.");
+    return;
+  }
+  if (inQty > outQty) {
+    alert("입고 수량이 출고 수량보다 많을 수 없습니다.");
+    return;
+  }
+
+  // OUT
+  let stock = getStock();
+  let outItem = stock.find((i) => i.code === outCode);
+  if (!outItem) {
+    alert("OUT 코드가 재고에 없습니다.");
+    return;
+  }
+  if (outItem.qty < outQty) {
+    alert("출고 수량이 재고보다 많습니다.");
+    return;
+  }
+  outItem.qty -= outQty;
+  outItem.lastUpdate = new Date().toLocaleString();
+
+  // IN (코드 변경 입고)
+  let inItem = stock.find((i) => i.code === inCode);
+  if (!inItem) {
+    stock.push({
+      code: inCode,
+      name: inName,
+      qty: inQty,
+      minQty: 0,
+      unit: "SET",
+      lastUpdate: new Date().toLocaleString(),
+    });
+  } else {
+    inItem.qty += inQty;
+    inItem.lastUpdate = new Date().toLocaleString();
+  }
+
+  saveStock(stock);
+
+  const defect = outQty - inQty;
+  const now = new Date().toLocaleString();
+
+  const list = getOutsourcing();
+  list.push({
+    date: now.split(" ")[0],
+    outCode,
+    outName,
+    outQty,
+    inCode,
+    inName,
+    inQty,
+    defect,
+    vendor,
+    updated: now,
+  });
+  saveOutsourcingData(list);
+
+  alert("외주 등록 완료! (코드 변경 입고 + 불량 계산)");
+  loadPage("outsourcing");
+}
+
+function renderOutsourcingPage() {
+  const tbody = document.getElementById("outsourcingTableBody");
+  if (!tbody) return;
+
+  const list = getOutsourcing();
+  tbody.innerHTML = "";
+  list.forEach((r) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${r.date}</td>
+        <td>${r.outCode}</td>
+        <td>${r.outName}</td>
+        <td>${r.outQty}</td>
+        <td>${r.inCode}</td>
+        <td>${r.inName}</td>
+        <td>${r.inQty}</td>
+        <td>${r.defect}</td>
+        <td>${r.vendor}</td>
+        <td>${r.updated}</td>
+      </tr>
+    `;
+  });
 }
