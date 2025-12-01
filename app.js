@@ -261,14 +261,17 @@ function renderLogsPage() {
 }
 
 /*************************************************
- * SUPPLIER MODULE (Email + 담당자 + Vendor Name 추가)
+ * SUPPLIER MODULE (상세정보 + 통계 + AP 결제)
  *************************************************/
+
+// 기본 구조: name, vendorName, contactPerson, email, address, phone,
+// bankName, bankAccount, bankHolder
 function getSuppliers() {
   let raw = JSON.parse(localStorage.getItem("suppliers") || "[]");
 
-  // 예전 버전 호환
+  // 옛날 버전 호환 (문자열 배열 또는 필드 부족한 객체)
   raw = raw.map(old => ({
-    name: old.name || old,   // 기존 문자열버전 자동 변환
+    name: typeof old === "string" ? old : (old.name || ""),
     vendorName: old.vendorName || "",
     contactPerson: old.contactPerson || "",
     email: old.email || "",
@@ -286,7 +289,7 @@ function saveSuppliers(list) {
   localStorage.setItem("suppliers", JSON.stringify(list));
 }
 
-// 기본 Supplier 등록
+// 초기 더미 데이터
 (function initSuppliers() {
   let s = getSuppliers();
   if (s.length === 0) {
@@ -299,26 +302,106 @@ function saveSuppliers(list) {
 })();
 
 /*************************************************
- * Supplier 통계 계산
+ * AP(미지급) 결제 기록
+ * - purchase: 총 구매금액
+ * - payments: 총 결제금액
+ * - outstanding: purchase - payments
  *************************************************/
-function getSupplierStats(name) {
-  const purchase = JSON.parse(localStorage.getItem("purchase") || "[]");
-  let totalQty = 0;
-  let totalAmount = 0;
+function getSupplierPayments() {
+  return JSON.parse(localStorage.getItem("supplierPayments") || "[]");
+}
 
-  purchase.forEach(p => {
-    if (p.supplier === name) {
-      totalQty += Number(p.qty) || 0;
-      totalAmount += (Number(p.qty) || 0) * (Number(p.price) || 0);
-    }
+function saveSupplierPayments(list) {
+  localStorage.setItem("supplierPayments", JSON.stringify(list));
+}
+
+function addSupplierPayment(supplierName, amount) {
+  const list = getSupplierPayments();
+  list.push({
+    supplier: supplierName,
+    amount: Number(amount) || 0,
+    date: new Date().toLocaleDateString(),
+    time: new Date().toLocaleString(),
   });
-
-  return { totalQty, totalAmount };
+  saveSupplierPayments(list);
 }
 
 /*************************************************
- * Supplier 렌더링
+ * Supplier 통계 계산 (총 수량 / 총 금액 / 총 결제 / 미지급)
  *************************************************/
+function getSupplierStats(name) {
+  const purchase = JSON.parse(localStorage.getItem("purchase") || "[]");
+  const payments = getSupplierPayments();
+
+  let totalQty = 0;
+  let totalAmount = 0;
+  let totalPaid = 0;
+
+  purchase.forEach(p => {
+    if (p.supplier === name) {
+      const qty = Number(p.qty) || 0;
+      const price = Number(p.price) || 0;
+      totalQty += qty;
+      totalAmount += qty * price;
+    }
+  });
+
+  payments.forEach(pay => {
+    if (pay.supplier === name) {
+      totalPaid += Number(pay.amount) || 0;
+    }
+  });
+
+  const outstanding = totalAmount - totalPaid;
+  return { totalQty, totalAmount, totalPaid, outstanding };
+}
+
+/*************************************************
+ * Supplier 월별 통계 (그래프용)
+ * - 최근 6개월 기준
+ *************************************************/
+function getSupplierMonthlyData(name, months = 6) {
+  const purchase = JSON.parse(localStorage.getItem("purchase") || "[]");
+  const labels = [];
+  const qtyMap = {};
+  const amountMap = {};
+
+  const now = new Date();
+  // 최근 N개월 라벨: YYYY-MM
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setMonth(d.getMonth() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    labels.push(key);
+    qtyMap[key] = 0;
+    amountMap[key] = 0;
+  }
+
+  purchase.forEach(p => {
+    if (p.supplier !== name) return;
+    // p.date가 YYYY-MM-DD 형태라고 가정
+    const d = new Date(p.date || p.updated || new Date());
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (qtyMap[key] != null) {
+      const qty = Number(p.qty) || 0;
+      const price = Number(p.price) || 0;
+      qtyMap[key] += qty;
+      amountMap[key] += qty * price;
+    }
+  });
+
+  const qtyData = labels.map(k => qtyMap[k]);
+  const amountData = labels.map(k => amountMap[k]);
+
+  return { labels, qtyData, amountData };
+}
+
+/*************************************************
+ * Supplier 테이블 렌더
+ *************************************************/
+let supplierChart = null;        // Supplier 전용 차트 객체
+let selectedSupplierForChart = ""; // 현재 그래프용 선택 supplier
+
 function renderSupplierPage() {
   const tbody = document.getElementById("supplierTableBody");
   if (!tbody) return;
@@ -344,12 +427,23 @@ function renderSupplierPage() {
         </td>
         <td>${stat.totalQty}</td>
         <td>${stat.totalAmount.toLocaleString()}</td>
+        <td>${stat.totalPaid.toLocaleString()}</td>
+        <td>${stat.outstanding.toLocaleString()}</td>
         <td>
-          <button class="btn-mini" onclick="deleteSupplier('${s.name}')">삭제</button>
+          <button class="btn-mini" onclick="openSupplierModal('${s.name}')">수정</button>
+          <button class="btn-mini" onclick="setSupplierChart('${s.name}')">그래프</button>
         </td>
       </tr>
     `;
   });
+
+  // 기본 선택: 첫 번째 supplier
+  if (!selectedSupplierForChart && list.length > 0) {
+    selectedSupplierForChart = list[0].name;
+  }
+  if (selectedSupplierForChart) {
+    renderSupplierChart(selectedSupplierForChart);
+  }
 }
 
 /*************************************************
@@ -388,11 +482,10 @@ function addSupplier() {
   saveSuppliers(list);
   writeLog("SUPPLIER ADD", name);
 
-  // 입력 초기화
   [
     "newSupplier","supplierVendorName","supplierContact","supplierEmail",
     "supplierAddress","supplierPhone","supplierBankName","supplierBankAccount","supplierBankHolder"
-  ].forEach(id => document.getElementById(id).value = "");
+  ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ""; });
 
   renderSupplierPage();
 }
@@ -402,7 +495,7 @@ function addSupplier() {
  *************************************************/
 function deleteSupplier(nameOverride) {
   const name = nameOverride || document.getElementById("newSupplier").value.trim();
-  if (!name) return alert("삭제할 공급업체명을 입력하거나 테이블 삭제 버튼을 사용하세요.");
+  if (!name) return alert("삭제할 공급업체명을 입력하거나 테이블의 삭제 버튼을 사용하세요.");
 
   let list = getSuppliers();
   if (!list.some(s => s.name === name)) return alert("해당 공급업체가 없습니다.");
@@ -411,7 +504,174 @@ function deleteSupplier(nameOverride) {
   saveSuppliers(list);
   writeLog("SUPPLIER DELETE", name);
 
+  if (selectedSupplierForChart === name) {
+    selectedSupplierForChart = "";
+  }
+
   renderSupplierPage();
+}
+
+/*************************************************
+ * Supplier 수정 팝업
+ *************************************************/
+function openSupplierModal(name) {
+  const list = getSuppliers();
+  const s = list.find(x => x.name === name);
+  if (!s) return;
+
+  document.getElementById("editSupplierName").value = s.name;
+  document.getElementById("editVendorName").value = s.vendorName || "";
+  document.getElementById("editContactPerson").value = s.contactPerson || "";
+  document.getElementById("editEmail").value = s.email || "";
+  document.getElementById("editAddress").value = s.address || "";
+  document.getElementById("editPhone").value = s.phone || "";
+  document.getElementById("editBankName").value = s.bankName || "";
+  document.getElementById("editBankAccount").value = s.bankAccount || "";
+  document.getElementById("editBankHolder").value = s.bankHolder || "";
+
+  const modal = document.getElementById("supplierModal");
+  modal.style.display = "block";
+}
+
+function closeSupplierModal() {
+  const modal = document.getElementById("supplierModal");
+  modal.style.display = "none";
+}
+
+function saveSupplierEdit() {
+  const name = document.getElementById("editSupplierName").value.trim();
+  const vendorName = document.getElementById("editVendorName").value.trim();
+  const contactPerson = document.getElementById("editContactPerson").value.trim();
+  const email = document.getElementById("editEmail").value.trim();
+  const address = document.getElementById("editAddress").value.trim();
+  const phone = document.getElementById("editPhone").value.trim();
+  const bankName = document.getElementById("editBankName").value.trim();
+  const bankAccount = document.getElementById("editBankAccount").value.trim();
+  const bankHolder = document.getElementById("editBankHolder").value.trim();
+
+  let list = getSuppliers();
+  const s = list.find(x => x.name === name);
+  if (!s) return alert("Supplier not found.");
+
+  s.vendorName = vendorName;
+  s.contactPerson = contactPerson;
+  s.email = email;
+  s.address = address;
+  s.phone = phone;
+  s.bankName = bankName;
+  s.bankAccount = bankAccount;
+  s.bankHolder = bankHolder;
+
+  saveSuppliers(list);
+  writeLog("SUPPLIER EDIT", name);
+
+  closeSupplierModal();
+  renderSupplierPage();
+}
+
+/*************************************************
+ * AP 결제 처리
+ *************************************************/
+function payAP() {
+  const name = document.getElementById("editSupplierName").value.trim();
+  const amountStr = document.getElementById("apPayAmount").value.trim();
+  const amount = Number(amountStr);
+  if (!name) return alert("Supplier 없음.");
+  if (!amountStr || isNaN(amount) || amount <= 0) return alert("올바른 결제 금액을 입력하세요.");
+
+  addSupplierPayment(name, amount);
+  writeLog("SUPPLIER PAYMENT", `${name} pay ${amount}`);
+
+  document.getElementById("apPayAmount").value = "";
+  renderSupplierPage();
+}
+
+/*************************************************
+ * Supplier 월별 그래프 (Chart.js)
+ *************************************************/
+function setSupplierChart(name) {
+  selectedSupplierForChart = name;
+  renderSupplierChart(name);
+}
+
+function renderSupplierChart(name) {
+  const canvas = document.getElementById("supplierChart");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  const { labels, qtyData, amountData } = getSupplierMonthlyData(name, 6);
+
+  if (supplierChart) {
+    supplierChart.destroy();
+  }
+
+  supplierChart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Qty",
+          data: qtyData,
+          yAxisID: "yQty",
+        },
+        {
+          label: "Amount",
+          data: amountData,
+          yAxisID: "yAmount",
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        title: {
+          display: true,
+          text: `Monthly Purchase - ${name}`
+        }
+      },
+      scales: {
+        yQty: {
+          type: "linear",
+          position: "left",
+          beginAtZero: true,
+        },
+        yAmount: {
+          type: "linear",
+          position: "right",
+          beginAtZero: true,
+          grid: { drawOnChartArea: false }
+        }
+      }
+    }
+  });
+}
+
+/*************************************************
+ * Supplier PDF Export
+ *************************************************/
+async function exportSuppliersPDF() {
+  const tableWrapper = document.getElementById("supplierSection");
+  if (!tableWrapper) {
+    alert("Supplier 영역을 찾을 수 없습니다.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF("l", "mm", "a4");
+
+  const canvas = await html2canvas(tableWrapper, { scale: 2 });
+  const imgData = canvas.toDataURL("image/png");
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  const imgWidth = pageWidth - 20;
+  const imgHeight = canvas.height * imgWidth / canvas.width;
+
+  pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+  pdf.save("suppliers.pdf");
+  writeLog("SUPPLIER PDF", "Export suppliers.pdf");
 }
 
 
@@ -1369,27 +1629,38 @@ const PageTemplates = {
       <input id="supplierBankAccount" placeholder="Account Number" style="min-width:140px;">
       <input id="supplierBankHolder" placeholder="Account Holder" style="min-width:140px;">
       <button onclick="addSupplier()" class="btn-primary">추가</button>
+      <button onclick="exportSuppliersPDF()" class="btn-secondary">PDF Export</button>
     </div>
 
-    <table class="erp-table" style="margin-top:20px;">
-      <thead>
-        <tr>
-          <th>Supplier</th>
-          <th>Vendor</th>
-          <th>Contact</th>
-          <th>Email</th>
-          <th>Address</th>
-          <th>Phone</th>
-          <th>Bank Info</th>
-          <th>Total Qty</th>
-          <th>Total Amount</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="supplierTableBody"></tbody>
-    </table>
+    <div id="supplierSection" style="margin-top:16px;">
+      <table class="erp-table">
+        <thead>
+          <tr>
+            <th>Supplier</th>
+            <th>Vendor</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Phone</th>
+            <th>Bank Info</th>
+            <th>Total Qty</th>
+            <th>Total Amount</th>
+            <th>Total Paid</th>
+            <th>Outstanding(AP)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="supplierTableBody"></tbody>
+      </table>
+
+      <div style="margin-top:20px;">
+        <h3>Supplier Monthly Chart (최근 6개월)</h3>
+        <canvas id="supplierChart" height="120"></canvas>
+      </div>
+    </div>
   `;
-}
+},
+
 
 
   employees(lang) {
@@ -1529,3 +1800,11 @@ window.downloadOutgoingCSV = downloadOutgoingCSV;
 window.downloadProductionCSV = downloadProductionCSV;
 window.addSupplier = addSupplier;
 window.deleteSupplier = deleteSupplier;
+window.addSupplier = addSupplier;
+window.deleteSupplier = deleteSupplier;
+window.openSupplierModal = openSupplierModal;
+window.closeSupplierModal = closeSupplierModal;
+window.saveSupplierEdit = saveSupplierEdit;
+window.payAP = payAP;
+window.setSupplierChart = setSupplierChart;
+window.exportSuppliersPDF = exportSuppliersPDF;
