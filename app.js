@@ -265,13 +265,57 @@ production(lang) {
     `;
   },
 
-  bom() {
-    return `
-      <h2>BOM</h2>
-      <p>Raw material mapping.</p>
+  /*************************************************
+ * BOM MODULE
+ *************************************************/
+
+function getBOM() {
+  return JSON.parse(localStorage.getItem("bom") || "[]");
+}
+function saveBOMData(b) {
+  localStorage.setItem("bom", JSON.stringify(b));
+}
+
+function saveBOM() {
+  const product = document.getElementById("bomProduct").value;
+  const code = document.getElementById("bomMatCode").value;
+  const name = document.getElementById("bomMatName").value;
+  const qty = Number(document.getElementById("bomQty").value);
+
+  if (!product || !code || !name || !qty) return alert("모두 입력!");
+
+  const b = getBOM();
+  b.push({
+    product,
+    matCode: code,
+    matName: name,
+    qty,
+    updated: new Date().toLocaleString()
+  });
+
+  saveBOMData(b);
+  alert("BOM 저장됨");
+  loadPage("bom");
+}
+
+function loadBOM() {
+  const tbody = document.getElementById("bomTableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  getBOM().forEach(i => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${i.product}</td>
+        <td>${i.matCode}</td>
+        <td>${i.matName}</td>
+        <td>${i.qty}</td>
+        <td>${i.updated}</td>
+      </tr>
     `;
-  },
-};
+  });
+}
+
 
 /*************************************************
  * RENDERING
@@ -429,4 +473,61 @@ function renderStockPage() {
       </tr>
     `;
   });
+}
+/*************************************************
+ * PRODUCTION MODULE (BOM 기반 자동 차감)
+ *************************************************/
+
+function getBomForProduct(productKey) {
+  const bom = getBOM();
+  return bom.filter(i => i.product === productKey);
+}
+
+function runProduction(productKey, qty) {
+  qty = Number(qty);
+  if (!productKey || !qty) return alert("모두 입력!");
+
+  const bomList = getBomForProduct(productKey);
+
+  if (bomList.length === 0) {
+    return alert("BOM에 해당 제품이 없습니다.");
+  }
+
+  let stock = getStock();
+  let errors = [];
+
+  // 1) 재고 부족 여부 검사
+  bomList.forEach(b => {
+    const need = b.qty * qty;
+    const mat = stock.find(s => s.code === b.matCode);
+
+    if (!mat) {
+      errors.push(`${b.matCode} 없음`);
+    } else if (mat.qty < need) {
+      errors.push(`${b.matCode} 재고 부족: 필요 ${need}, 현재 ${mat.qty}`);
+    }
+  });
+
+  if (errors.length > 0) {
+    return alert("생산 불가:\n" + errors.join("\n"));
+  }
+
+  // 2) 재고 차감 실행
+  bomList.forEach(b => {
+    const need = b.qty * qty;
+    const mat = stock.find(s => s.code === b.matCode);
+    mat.qty -= need;
+    mat.lastUpdate = new Date().toLocaleString();
+  });
+
+  saveStock(stock);
+  alert("생산 완료! (BOM 기반 재고 차감 완료)");
+  loadPage("stock");
+}
+
+function onProduction() {
+  const product = document.getElementById("prodProduct").value;
+  const qty = document.getElementById("prodQty").value;
+
+  runProduction(product, qty);
 }
