@@ -1,1 +1,18 @@
+production(lang) {
+    const t = i18n[lang].pages;
+    return `
+      <h2>${t.productionTitle}</h2>
+      <p>${t.productionDesc}</p>
+
+      <div class="production-form">
+        <input type="text" id="prodProduct" placeholder="Finished Product (BOM Product)">
+        <input type="number" id="prodQty" placeholder="Production Qty">
+        <button class="btn-primary" onclick="onProduction()">생산 등록</button>
+      </div>
+
+      <p style="font-size: 12px; opacity: 0.7; margin-top: 8px;">
+        ※ BOM에 등록된 <b>product</b> 값과 동일한 값을 입력해야 원자재 자동 차감이 됩니다.
+      </p>
+    `;
+},
 
