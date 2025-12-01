@@ -688,3 +688,52 @@ document.addEventListener("DOMContentLoaded", () => {
 // 전역으로 노출 (HTML onclick 에서 사용)
 window.setLanguage = setLanguage;
 window.loadPage = loadPage;
+
+/* ============================
+      BOM MODULE
+============================ */
+function loadBOM() {
+    const bomData = JSON.parse(localStorage.getItem("bom") || "[]");
+    const table = document.getElementById("bomTable");
+    if (!table) return;
+
+    table.innerHTML = "";
+
+    bomData.forEach(item => {
+        table.innerHTML += `
+        <tr>
+            <td>${item.bomCode}</td>
+            <td>${item.product}</td>
+            <td>${item.matCode}</td>
+            <td>${item.matName}</td>
+            <td>${item.qty}</td>
+            <td>${item.unit}</td>
+            <td>${item.updated}</td>
+        </tr>
+        `;
+    });
+}
+
+function showAddBOM() {
+    document.getElementById("bomForm").style.display = "block";
+}
+
+function saveBOM() {
+    const bomData = JSON.parse(localStorage.getItem("bom") || "[]");
+
+    const newItem = {
+        bomCode: "BOM-" + String(Date.now()).slice(-5),
+        product: document.getElementById("bomProduct").value,
+        matCode: document.getElementById("bomMatCode").value,
+        matName: document.getElementById("bomMatName").value,
+        qty: document.getElementById("bomQty").value,
+        unit: document.getElementById("bomUnit").value,
+        updated: new Date().toLocaleString()
+    };
+
+    bomData.push(newItem);
+    localStorage.setItem("bom", JSON.stringify(bomData));
+
+    alert("BOM Saved!");
+    loadBOM();
+}
