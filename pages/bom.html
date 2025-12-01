@@ -1,1 +1,40 @@
+<h2>BOM (Bill of Materials)</h2>
+
+<button onclick="showAddBOM()">+ Add BOM</button>
+
+<table>
+    <thead>
+        <tr>
+            <th>BOM Code</th>
+            <th>Product Name</th>
+            <th>Material Code</th>
+            <th>Material Name</th>
+            <th>Qty</th>
+            <th>Unit</th>
+            <th>Last Updated</th>
+        </tr>
+    </thead>
+    <tbody id="bomTable"></tbody>
+</table>
+
+<div id="bomForm" class="card" style="display:none; margin-top:20px;">
+    <h3>Add New BOM</h3>
+
+    <label>Product Name</label><br>
+    <input id="bomProduct" type="text"><br>
+
+    <label>Material Code</label><br>
+    <input id="bomMatCode" type="text"><br>
+
+    <label>Material Name</label><br>
+    <input id="bomMatName" type="text"><br>
+
+    <label>Quantity</label><br>
+    <input id="bomQty" type="number"><br>
+
+    <label>Unit</label><br>
+    <input id="bomUnit" type="text" value="SET"><br>
+
+    <button onclick="saveBOM()">Save</button>
+</div>
 
