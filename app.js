@@ -244,6 +244,13 @@ const PageTemplates = {
       <h2>${t.purchaseTitle}</h2>
       <p>${t.purchaseDesc}</p>
       <div class="table-toolbar">
+      <div class="purchase-form">
+    <input type="text" id="pCode" placeholder="Material Code">
+    <input type="text" id="pName" placeholder="Material Name">
+    <input type="number" id="pQty" placeholder="Qty">
+    <button class="btn-primary" onclick="onPurchase()">입고 등록</button>
+</div>
+
         <button class="btn-primary">+ New Purchase (dummy)</button>
       </div>
       <table class="erp-table">
