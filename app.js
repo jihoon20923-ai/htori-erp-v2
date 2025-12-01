@@ -261,57 +261,159 @@ function renderLogsPage() {
 }
 
 /*************************************************
- * SUPPLIER MODULE
+ * SUPPLIER MODULE (Email + 담당자 + Vendor Name 추가)
  *************************************************/
 function getSuppliers() {
-  return JSON.parse(localStorage.getItem("suppliers") || "[]");
+  let raw = JSON.parse(localStorage.getItem("suppliers") || "[]");
+
+  // 예전 버전 호환
+  raw = raw.map(old => ({
+    name: old.name || old,   // 기존 문자열버전 자동 변환
+    vendorName: old.vendorName || "",
+    contactPerson: old.contactPerson || "",
+    email: old.email || "",
+    address: old.address || "",
+    phone: old.phone || "",
+    bankName: old.bankName || "",
+    bankAccount: old.bankAccount || "",
+    bankHolder: old.bankHolder || "",
+  }));
+
+  return raw;
 }
+
 function saveSuppliers(list) {
   localStorage.setItem("suppliers", JSON.stringify(list));
 }
+
+// 기본 Supplier 등록
 (function initSuppliers() {
   let s = getSuppliers();
   if (s.length === 0) {
-    s = ["Supplier A", "Supplier B", "Supplier C"];
+    s = [
+      { name: "Supplier A", vendorName: "", contactPerson: "", email: "", address: "", phone: "", bankName: "", bankAccount: "", bankHolder: "" },
+      { name: "Supplier B", vendorName: "", contactPerson: "", email: "", address: "", phone: "", bankName: "", bankAccount: "", bankHolder: "" },
+    ];
     saveSuppliers(s);
   }
 })();
 
+/*************************************************
+ * Supplier 통계 계산
+ *************************************************/
+function getSupplierStats(name) {
+  const purchase = JSON.parse(localStorage.getItem("purchase") || "[]");
+  let totalQty = 0;
+  let totalAmount = 0;
+
+  purchase.forEach(p => {
+    if (p.supplier === name) {
+      totalQty += Number(p.qty) || 0;
+      totalAmount += (Number(p.qty) || 0) * (Number(p.price) || 0);
+    }
+  });
+
+  return { totalQty, totalAmount };
+}
+
+/*************************************************
+ * Supplier 렌더링
+ *************************************************/
 function renderSupplierPage() {
-  const ul = document.getElementById("supplierList");
-  if (!ul) return;
+  const tbody = document.getElementById("supplierTableBody");
+  if (!tbody) return;
+
   const list = getSuppliers();
-  ul.innerHTML = "";
+  tbody.innerHTML = "";
+
   list.forEach(s => {
-    ul.innerHTML += `<li>${s}</li>`;
+    const stat = getSupplierStats(s.name);
+
+    tbody.innerHTML += `
+      <tr>
+        <td>${s.name}</td>
+        <td>${s.vendorName}</td>
+        <td>${s.contactPerson}</td>
+        <td>${s.email}</td>
+        <td>${s.address}</td>
+        <td>${s.phone}</td>
+        <td>
+          ${s.bankName}<br>
+          ${s.bankAccount}<br>
+          ${s.bankHolder}
+        </td>
+        <td>${stat.totalQty}</td>
+        <td>${stat.totalAmount.toLocaleString()}</td>
+        <td>
+          <button class="btn-mini" onclick="deleteSupplier('${s.name}')">삭제</button>
+        </td>
+      </tr>
+    `;
   });
 }
 
+/*************************************************
+ * Supplier 추가
+ *************************************************/
 function addSupplier() {
-  const input = document.getElementById("newSupplier");
-  const name = input.value.trim();
+  const name = document.getElementById("newSupplier").value.trim();
+  const vendorName = document.getElementById("supplierVendorName").value.trim();
+  const contactPerson = document.getElementById("supplierContact").value.trim();
+  const email = document.getElementById("supplierEmail").value.trim();
+  const address = document.getElementById("supplierAddress").value.trim();
+  const phone = document.getElementById("supplierPhone").value.trim();
+  const bankName = document.getElementById("supplierBankName").value.trim();
+  const bankAccount = document.getElementById("supplierBankAccount").value.trim();
+  const bankHolder = document.getElementById("supplierBankHolder").value.trim();
+
   if (!name) return alert("공급업체명을 입력하세요.");
+
   const list = getSuppliers();
-  if (list.includes(name)) return alert("이미 존재합니다.");
-  list.push(name);
+  if (list.some(s => s.name === name)) {
+    return alert("이미 존재하는 공급업체입니다.");
+  }
+
+  list.push({
+    name,
+    vendorName,
+    contactPerson,
+    email,
+    address,
+    phone,
+    bankName,
+    bankAccount,
+    bankHolder,
+  });
+
   saveSuppliers(list);
   writeLog("SUPPLIER ADD", name);
-  input.value = "";
+
+  // 입력 초기화
+  [
+    "newSupplier","supplierVendorName","supplierContact","supplierEmail",
+    "supplierAddress","supplierPhone","supplierBankName","supplierBankAccount","supplierBankHolder"
+  ].forEach(id => document.getElementById(id).value = "");
+
   renderSupplierPage();
 }
 
-function deleteSupplier() {
-  const input = document.getElementById("newSupplier");
-  const name = input.value.trim();
-  if (!name) return alert("삭제할 공급업체명을 입력하세요.");
+/*************************************************
+ * Supplier 삭제
+ *************************************************/
+function deleteSupplier(nameOverride) {
+  const name = nameOverride || document.getElementById("newSupplier").value.trim();
+  if (!name) return alert("삭제할 공급업체명을 입력하거나 테이블 삭제 버튼을 사용하세요.");
+
   let list = getSuppliers();
-  if (!list.includes(name)) return alert("해당 공급업체가 없습니다.");
-  list = list.filter(s => s !== name);
+  if (!list.some(s => s.name === name)) return alert("해당 공급업체가 없습니다.");
+
+  list = list.filter(s => s.name !== name);
   saveSuppliers(list);
   writeLog("SUPPLIER DELETE", name);
-  input.value = "";
+
   renderSupplierPage();
 }
+
 
 /*************************************************
  * STOCK MODULE
@@ -1251,20 +1353,44 @@ const PageTemplates = {
   },
 
   suppliers(lang) {
-    const t = i18n[lang].pages;
-    return `
-      <h2>${t.suppliersTitle}</h2>
-      <p>${t.suppliersDesc}</p>
+  const t = i18n[lang].pages;
+  return `
+    <h2>${t.suppliersTitle}</h2>
+    <p>${t.suppliersDesc}</p>
 
-      <div class="form-row">
-        <input id="newSupplier" placeholder="Supplier Name">
-        <button onclick="addSupplier()" class="btn-primary">추가</button>
-        <button onclick="deleteSupplier()" class="btn-secondary">삭제</button>
-      </div>
+    <div class="form-row" style="flex-wrap: wrap; gap: 10px;">
+      <input id="newSupplier" placeholder="Supplier Name" style="min-width:130px;">
+      <input id="supplierVendorName" placeholder="Vendor Name" style="min-width:130px;">
+      <input id="supplierContact" placeholder="Contact Person" style="min-width:130px;">
+      <input id="supplierEmail" placeholder="Email" style="min-width:160px;">
+      <input id="supplierAddress" placeholder="Address" style="min-width:180px;">
+      <input id="supplierPhone" placeholder="Phone" style="min-width:120px;">
+      <input id="supplierBankName" placeholder="Bank Name" style="min-width:120px;">
+      <input id="supplierBankAccount" placeholder="Account Number" style="min-width:140px;">
+      <input id="supplierBankHolder" placeholder="Account Holder" style="min-width:140px;">
+      <button onclick="addSupplier()" class="btn-primary">추가</button>
+    </div>
 
-      <ul id="supplierList" style="margin-top:10px;"></ul>
-    `;
-  },
+    <table class="erp-table" style="margin-top:20px;">
+      <thead>
+        <tr>
+          <th>Supplier</th>
+          <th>Vendor</th>
+          <th>Contact</th>
+          <th>Email</th>
+          <th>Address</th>
+          <th>Phone</th>
+          <th>Bank Info</th>
+          <th>Total Qty</th>
+          <th>Total Amount</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="supplierTableBody"></tbody>
+    </table>
+  `;
+}
+
 
   employees(lang) {
     const t = i18n[lang].pages;
