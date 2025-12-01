@@ -1,8 +1,7 @@
 /*************************************************
  * HTORI ERP – Frontend Single Page App
  * - 메뉴 클릭 시 content 영역에 페이지 렌더링
- * - EN / KR / ID 다국어 지원 (텍스트만 변경)
- * - 현재는 화면 구조만, 실제 데이터/DB 연동은 X
+ * - EN / KR / ID 다국어 지원
  *************************************************/
 
 /** 사용 가능한 언어 */
@@ -161,7 +160,8 @@ const i18n = {
   },
 };
 
-/** 사이드바 메뉴 순서 (HTML과 동일해야 함) */
+
+/** 메뉴 순서 */
 const MENU_ORDER = [
   "dashboard",
   "stock",
@@ -179,7 +179,7 @@ const MENU_ORDER = [
 ];
 
 /*************************************************
- * 페이지 템플릿
+ * PAGE TEMPLATES
  *************************************************/
 
 const PageTemplates = {
@@ -188,637 +188,228 @@ const PageTemplates = {
     return `
       <h2>${t.dashboardTitle}</h2>
       <p>${t.dashboardDesc}</p>
-      <div class="cards">
-        <div class="card">
-          <div class="card-label">Total Stock Items</div>
-          <div class="card-value">0</div>
-        </div>
-        <div class="card">
-          <div class="card-label">Today Production Qty</div>
-          <div class="card-value">0</div>
-        </div>
-        <div class="card">
-          <div class="card-label">Finished Goods Qty</div>
-          <div class="card-value">0</div>
-        </div>
-      </div>
     `;
   },
 
+  /* STOCK PAGE – 동적 재고 테이블 */
   stock(lang) {
     const t = i18n[lang].pages;
     return `
       <h2>${t.stockTitle}</h2>
       <p>${t.stockDesc}</p>
-      <div class="table-toolbar">
-        <button class="btn-primary">+ Add Material (dummy)</button>
-      </div>
+
       <table class="erp-table">
         <thead>
           <tr>
-            <th>Material Code</th>
-            <th>Material Name</th>
-            <th>Quantity</th>
-            <th>Min Qty</th>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Qty</th>
+            <th>Min</th>
             <th>Unit</th>
-            <th>Last Updated</th>
+            <th>Updated</th>
           </tr>
         </thead>
-        <tbody>
-          <tr>
-            <td>H-CP01-12</td>
-            <td>SEMI PRODUCTS 12mm</td>
-            <td>3,200</td>
-            <td>1,000</td>
-            <td>SET</td>
-            <td>-</td>
-          </tr>
-        </tbody>
+        <tbody id="stockTableBody"></tbody>
       </table>
+
+      <script>renderStockPage()</script>
     `;
   },
 
+  /* PURCHASE PAGE – 입고 입력 */
   purchase(lang) {
     const t = i18n[lang].pages;
     return `
       <h2>${t.purchaseTitle}</h2>
       <p>${t.purchaseDesc}</p>
-      <div class="table-toolbar">
-      <div class="purchase-form">
-    <input type="text" id="pCode" placeholder="Material Code">
-    <input type="text" id="pName" placeholder="Material Name">
-    <input type="number" id="pQty" placeholder="Qty">
-    <button class="btn-primary" onclick="onPurchase()">입고 등록</button>
-</div>
 
-        <button class="btn-primary">+ New Purchase (dummy)</button>
+      <div class="purchase-form">
+        <input id="pCode" placeholder="Code">
+        <input id="pName" placeholder="Name">
+        <input id="pQty" type="number" placeholder="Qty">
+        <button onclick="onPurchase()" class="btn-primary">입고 등록</button>
       </div>
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Supplier</th>
-            <th>Material Code</th>
-            <th>Material Name</th>
-            <th>Qty</th>
-            <th>Unit</th>
-            <th>Unit Price</th>
-            <th>Currency</th>
-            <th>Remarks</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2025-11-13</td>
-            <td>SUPPLIER-A</td>
-            <td>H-CP01-12</td>
-            <td>SEMI PRODUCTS 12mm</td>
-            <td>1,000</td>
-            <td>SET</td>
-            <td>0.020</td>
-            <td>USD</td>
-            <td>Sample row</td>
-          </tr>
-        </tbody>
-      </table>
     `;
   },
 
+  /* OUTGOING PAGE – 출고 입력 */
   outgoing(lang) {
     const t = i18n[lang].pages;
     return `
       <h2>${t.outgoingTitle}</h2>
       <p>${t.outgoingDesc}</p>
-      <div class="table-toolbar">
-        <button class="btn-primary">+ New Outgoing (dummy)</button>
+
+      <div class="purchase-form">
+        <input id="oCode" placeholder="Code">
+        <input id="oName" placeholder="Name">
+        <input id="oQty" type="number" placeholder="Qty">
+        <button onclick="onOutgoing()" class="btn-secondary">출고 등록</button>
       </div>
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Material Code</th>
-            <th>Material Name</th>
-            <th>Qty</th>
-            <th>Unit</th>
-            <th>Reason</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2025-11-13</td>
-            <td>H-CP01-12</td>
-            <td>SEMI PRODUCTS 12mm</td>
-            <td>100</td>
-            <td>SET</td>
-            <td>Production use</td>
-          </tr>
-        </tbody>
-      </table>
     `;
   },
 
-  production(lang) {
-    const t = i18n[lang].pages;
+  bom() {
     return `
-      <h2>${t.productionTitle}</h2>
-      <p>${t.productionDesc}</p>
-      <div class="table-toolbar">
-        <button class="btn-primary">+ New Production (dummy)</button>
-      </div>
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Finished Code</th>
-            <th>Finished Name</th>
-            <th>Total Qty</th>
-            <th>Defect Qty</th>
-            <th>Good Qty</th>
-            <th>Worker</th>
-            <th>Lot No</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2025-11-13</td>
-            <td>VC100-SET</td>
-            <td>VC100 LASH SET</td>
-            <td>1,800</td>
-            <td>50</td>
-            <td>1,750</td>
-            <td>TEAM A</td>
-            <td>LOT-20251113-01</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  },
-
-    bom(lang) {
-    return `
-      <h2>BOM (Bill of Materials)</h2>
-      <p>Define raw materials needed for each finished product.</p>
-
-      <div class="table-toolbar">
-        <button class="btn-primary">+ Add BOM Item (dummy)</button>
-      </div>
-
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Product Code</th>
-            <th>Product Name</th>
-            <th>Material Code</th>
-            <th>Material Name</th>
-            <th>Qty Required</th>
-            <th>Unit</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>VC100-SET</td>
-            <td>VC100 Lash Set</td>
-            <td>H-CP01-12</td>
-            <td>Semi 12mm</td>
-            <td>5</td>
-            <td>EA</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  },
-
-  outsourcing(lang) {
-    const t = i18n[lang].pages;
-    return `
-      <h2>${t.outsourcingTitle}</h2>
-      <p>${t.outsourcingDesc}</p>
-      <div class="table-toolbar">
-        <button class="btn-primary">+ New Outsourcing (dummy)</button>
-      </div>
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>From Code</th>
-            <th>From Name</th>
-            <th>Qty Out</th>
-            <th>To Code</th>
-            <th>To Name</th>
-            <th>Qty In</th>
-            <th>Defect</th>
-            <th>Vendor</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2025-11-13</td>
-            <td>H-CP01-12</td>
-            <td>Semi Products 12mm</td>
-            <td>1,000</td>
-            <td>H-CP01-12-FIN</td>
-            <td>Semi Products 12mm (Finished)</td>
-            <td>980</td>
-            <td>20</td>
-            <td>OUT-VENDOR-1</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  },
-
-  finished(lang) {
-    const t = i18n[lang].pages;
-    return `
-      <h2>${t.finishedTitle}</h2>
-      <p>${t.finishedDesc}</p>
-      <div class="table-toolbar">
-        <button class="btn-primary">+ New Finished Item (dummy)</button>
-      </div>
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Product Code</th>
-            <th>Product Name</th>
-            <th>Qty</th>
-            <th>Unit</th>
-            <th>Last Updated</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>VC100-BLACK</td>
-            <td>VC100 12mm Black</td>
-            <td>10,000</td>
-            <td>SET</td>
-            <td>-</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  },
-
-  employees(lang) {
-    const t = i18n[lang].pages;
-    return `
-      <h2>${t.employeesTitle}</h2>
-      <p>${t.employeesDesc}</p>
-      <div class="table-toolbar">
-        <button class="btn-primary">+ Add Employee (dummy)</button>
-      </div>
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Employee ID</th>
-            <th>Name</th>
-            <th>Position</th>
-            <th>Department</th>
-            <th>Phone</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>EMP-0001</td>
-            <td>KIM JIHOON</td>
-            <td>Director</td>
-            <td>Management</td>
-            <td>-</td>
-            <td>Active</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  },
-
-  attendance(lang) {
-    const t = i18n[lang].pages;
-    return `
-      <h2>${t.attendanceTitle}</h2>
-      <p>${t.attendanceDesc}</p>
-      <div class="table-toolbar">
-        <button class="btn-primary">Clock In (dummy)</button>
-        <button class="btn-secondary">Clock Out (dummy)</button>
-      </div>
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Employee ID</th>
-            <th>Name</th>
-            <th>Check In</th>
-            <th>Check Out</th>
-            <th>Working Hours</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2025-11-13</td>
-            <td>EMP-0001</td>
-            <td>KIM JIHOON</td>
-            <td>09:00</td>
-            <td>17:00</td>
-            <td>8.0</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  },
-
-  payroll(lang) {
-    const t = i18n[lang].pages;
-    return `
-      <h2>${t.payrollTitle}</h2>
-      <p>${t.payrollDesc}</p>
-      <div class="table-toolbar">
-        <button class="btn-primary">+ Generate Payroll (dummy)</button>
-      </div>
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Employee ID</th>
-            <th>Name</th>
-            <th>Month</th>
-            <th>Hours</th>
-            <th>Base Salary</th>
-            <th>Allowance</th>
-            <th>Deduction</th>
-            <th>Total Pay</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>EMP-0001</td>
-            <td>KIM JIHOON</td>
-            <td>2025-11</td>
-            <td>173</td>
-            <td>4,000</td>
-            <td>0</td>
-            <td>0</td>
-            <td>4,000</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  },
-
-  logs(lang) {
-    const t = i18n[lang].pages;
-    return `
-      <h2>${t.logsTitle}</h2>
-      <p>${t.logsDesc}</p>
-      <table class="erp-table">
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>User</th>
-            <th>Action</th>
-            <th>Target</th>
-            <th>Note</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2025-11-13 10:00</td>
-            <td>SYSTEM</td>
-            <td>INIT</td>
-            <td>HTORI ERP</td>
-            <td>Sample log</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
-  },
-
-  settings(lang) {
-    const t = i18n[lang].pages;
-    return `
-      <h2>${t.settingsTitle}</h2>
-      <p>${t.settingsDesc}</p>
-      <div class="settings-grid">
-        <div class="settings-item">
-          <label>Default Language</label>
-          <select disabled>
-            <option>EN</option>
-            <option>KR</option>
-            <option>ID</option>
-          </select>
-          <small>Language is controlled by the buttons at the top.</small>
-        </div>
-        <div class="settings-item">
-          <label>Timezone</label>
-          <input type="text" value="Asia/Jakarta" disabled />
-        </div>
-        <div class="settings-item">
-          <label>Version</label>
-          <input type="text" value="0.2 (UI Prototype)" disabled />
-        </div>
-      </div>
+      <h2>BOM</h2>
+      <p>Raw material mapping.</p>
     `;
   },
 };
 
 /*************************************************
- * 렌더링 / 언어 변경 / 메뉴 처리
+ * RENDERING
  *************************************************/
 
-/** content 영역 렌더링 */
 function renderContent() {
   const lang = state.lang;
-  const page = state.page || "dashboard";
+  const page = state.page;
   const contentEl = document.getElementById("content");
 
-  const tmpl = PageTemplates[page] || PageTemplates.dashboard;
+  const tmpl = PageTemplates[page];
   contentEl.innerHTML = tmpl(lang);
 }
 
-/** 사이드바 텍스트 + active 표시 갱신 */
 function renderSidebar() {
   const lang = state.lang;
-  const tSidebar = i18n[lang].sidebar;
+  const t = i18n[lang].sidebar;
 
-  const items = document.querySelectorAll(".sidebar li");
-
-  items.forEach((li, idx) => {
+  document.querySelectorAll(".sidebar li").forEach((li, idx) => {
     const pageId = MENU_ORDER[idx];
-    li.dataset.page = pageId; // 나중에 사용할 수 있도록 저장
-    li.textContent = tSidebar[pageId] || pageId;
+    li.dataset.page = pageId;
+    li.textContent = t[pageId];
 
-    if (pageId === state.page) {
-      li.classList.add("active");
-    } else {
-      li.classList.remove("active");
-    }
+    li.classList.toggle("active", pageId === state.page);
   });
 }
 
-/** 헤더 텍스트 (로고) 갱신 */
 function renderHeader() {
-  const lang = state.lang;
-  const appTitle = i18n[lang].appTitle;
-  const logo = document.querySelector(".header .logo");
-  if (logo) logo.textContent = appTitle;
+  document.querySelector(".logo").textContent = i18n[state.lang].appTitle;
 }
 
-/** 현재 언어로 전체 UI 다시 그리기 */
 function rerenderAll() {
   renderHeader();
   renderSidebar();
   renderContent();
 }
 
-/** 언어 변경 (버튼에서 호출) */
+/*************************************************
+ * PAGE CHANGE / LANGUAGE CHANGE
+ *************************************************/
+
 function setLanguage(lang) {
-  if (!LANGS.includes(lang)) return;
   state.lang = lang;
   localStorage.setItem("htori_lang", lang);
   rerenderAll();
 }
 
-/** 페이지 변경 (사이드바에서 onclick으로 호출) */
 function loadPage(pageId) {
-  if (!PageTemplates[pageId]) pageId = "dashboard";
   state.page = pageId;
   localStorage.setItem("htori_page", pageId);
-  renderSidebar();
-  renderContent();
+  rerenderAll();
 }
 
 /*************************************************
- * 초기화
+ * INITIAL
  *************************************************/
+document.addEventListener("DOMContentLoaded", rerenderAll);
 
-document.addEventListener("DOMContentLoaded", () => {
-  // 처음 로드 시 한 번 전체 렌더
-  rerenderAll();
-});
-
-// 전역으로 노출 (HTML onclick 에서 사용)
 window.setLanguage = setLanguage;
 window.loadPage = loadPage;
 
-/* ============================
-      BOM MODULE
-============================ */
-function loadBOM() {
-    const bomData = JSON.parse(localStorage.getItem("bom") || "[]");
-    const table = document.getElementById("bomTable");
-    if (!table) return;
+/*************************************************
+ * STOCK MODULE (입고/출고)
+ *************************************************/
 
-    table.innerHTML = "";
-
-    bomData.forEach(item => {
-        table.innerHTML += `
-        <tr>
-            <td>${item.bomCode}</td>
-            <td>${item.product}</td>
-            <td>${item.matCode}</td>
-            <td>${item.matName}</td>
-            <td>${item.qty}</td>
-            <td>${item.unit}</td>
-            <td>${item.updated}</td>
-        </tr>
-        `;
-    });
-}
-
-function showAddBOM() {
-    document.getElementById("bomForm").style.display = "block";
-}
-
-function saveBOM() {
-    const bomData = JSON.parse(localStorage.getItem("bom") || "[]");
-
-    const newItem = {
-        bomCode: "BOM-" + String(Date.now()).slice(-5),
-        product: document.getElementById("bomProduct").value,
-        matCode: document.getElementById("bomMatCode").value,
-        matName: document.getElementById("bomMatName").value,
-        qty: document.getElementById("bomQty").value,
-        unit: document.getElementById("bomUnit").value,
-        updated: new Date().toLocaleString()
-    };
-
-    bomData.push(newItem);
-    localStorage.setItem("bom", JSON.stringify(bomData));
-
-    alert("BOM Saved!");
-    loadBOM();
-}
-function saveBOM() {
-    ...
-    loadBOM();
-}
-/* ============================
-      STOCK MODULE
-============================ */
-
-// LocalStorage Get/Save
 function getStock() {
-    return JSON.parse(localStorage.getItem("stock") || "[]");
+  return JSON.parse(localStorage.getItem("stock") || "[]");
 }
-function saveStock(data) {
-    localStorage.setItem("stock", JSON.stringify(data));
+function saveStock(s) {
+  localStorage.setItem("stock", JSON.stringify(s));
 }
 
-// 재고 업데이트 (입고)
+/* 입고 */
 function updateStock(code, name, qty) {
-    let stock = getStock();
-    qty = Number(qty);
+  let s = getStock();
+  qty = Number(qty);
 
-    let item = stock.find(i => i.code === code);
+  let item = s.find(i => i.code === code);
 
-    if (item) {
-        item.qty += qty;
-        item.lastUpdate = new Date().toLocaleString();
-    } else {
-        stock.push({
-            code: code,
-            name: name,
-            qty: qty,
-            minQty: 0,
-            unit: "SET",
-            lastUpdate: new Date().toLocaleString()
-        });
-    }
-
-    saveStock(stock);
-    alert("재고가 업데이트되었습니다!");
-    loadPage("stock");
-}
-
-// 재고 테이블 출력
-function renderStockPage() {
-    const stock = getStock();
-    const tbody = document.getElementById("stockTableBody");
-    if (!tbody) return;
-
-    tbody.innerHTML = "";
-
-    stock.forEach(item => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${item.code}</td>
-                <td>${item.name}</td>
-                <td>${item.qty}</td>
-                <td>${item.minQty}</td>
-                <td>${item.unit}</td>
-                <td>${item.lastUpdate}</td>
-            </tr>
-        `;
+  if (item) {
+    item.qty += qty;
+  } else {
+    s.push({
+      code,
+      name,
+      qty,
+      minQty: 0,
+      unit: "SET",
+      lastUpdate: new Date().toLocaleString(),
     });
+  }
+
+  item.lastUpdate = new Date().toLocaleString();
+
+  saveStock(s);
+  alert("입고 완료!");
+  loadPage("stock");
 }
 
-// PURCHASE → 입고 폼 처리
+/* 출고 */
+function outgoingStock(code, name, qty) {
+  let s = getStock();
+  qty = Number(qty);
+
+  let item = s.find(i => i.code === code);
+  if (!item) return alert("해당 코드 없음.");
+
+  if (item.qty < qty) return alert("재고 부족!");
+
+  item.qty -= qty;
+  item.lastUpdate = new Date().toLocaleString();
+
+  saveStock(s);
+  alert("출고 완료!");
+  loadPage("stock");
+}
+
+/* PURCHASE → 버튼 */
 function onPurchase() {
-    const code = document.getElementById("pCode").value.trim();
-    const name = document.getElementById("pName").value.trim();
-    const qty = document.getElementById("pQty").value.trim();
+  const code = document.getElementById("pCode").value;
+  const name = document.getElementById("pName").value;
+  const qty = document.getElementById("pQty").value;
 
-    if (!code || !name || !qty) {
-        alert("모든 값을 입력하세요.");
-        return;
-    }
+  if (!code || !name || !qty) return alert("모두 입력.");
 
-    updateStock(code, name, qty);
+  updateStock(code, name, qty);
+}
+
+/* OUTGOING → 버튼 */
+function onOutgoing() {
+  const code = document.getElementById("oCode").value;
+  const name = document.getElementById("oName").value;
+  const qty = document.getElementById("oQty").value;
+
+  if (!code || !name || !qty) return alert("모두 입력.");
+
+  outgoingStock(code, name, qty);
+}
+
+/* STOCK PAGE RENDER */
+function renderStockPage() {
+  const tbody = document.getElementById("stockTableBody");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+  getStock().forEach((i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${i.code}</td>
+        <td>${i.name}</td>
+        <td>${i.qty}</td>
+        <td>${i.minQty}</td>
+        <td>${i.unit}</td>
+        <td>${i.lastUpdate}</td>
+      </tr>
+    `;
+  });
 }
