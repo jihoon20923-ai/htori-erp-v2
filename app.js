@@ -49,6 +49,10 @@ const i18n = {
       stockDesc: "Raw / semi-finished / finished inventory.",
       purchaseTitle: "Purchase",
       purchaseDesc: "Incoming materials.",
+      // 폼 placeholder
+      purchaseFormCodePlaceholder: "Material Code",
+      purchaseFormNamePlaceholder: "Material Name",
+      purchaseFormQtyPlaceholder: "Qty",
       outgoingTitle: "Outgoing",
       outgoingDesc: "Manual outgoing.",
       productionTitle: "Production",
@@ -65,6 +69,12 @@ const i18n = {
       logsDesc: "System activity history.",
       settingsTitle: "Settings",
       settingsDesc: "ERP basic settings.",
+      employeesTitle: "Employees",
+      employeesDesc: "Employee master data.",
+      attendanceTitle: "Attendance",
+      attendanceDesc: "Clock-in / Clock-out records.",
+      payrollTitle: "Payroll",
+      payrollDesc: "Monthly payroll overview.",
     },
   },
   KR: {
@@ -92,6 +102,9 @@ const i18n = {
       stockDesc: "원자재 / 반제품 / 완제품 재고.",
       purchaseTitle: "입고 관리",
       purchaseDesc: "자재 입고 기록.",
+      purchaseFormCodePlaceholder: "자재 코드",
+      purchaseFormNamePlaceholder: "자재 이름",
+      purchaseFormQtyPlaceholder: "수량",
       outgoingTitle: "출고 관리",
       outgoingDesc: "자재 출고 기록.",
       productionTitle: "생산 관리",
@@ -108,6 +121,12 @@ const i18n = {
       logsDesc: "시스템 작업 기록.",
       settingsTitle: "설정",
       settingsDesc: "기본 설정.",
+      employeesTitle: "직원 관리",
+      employeesDesc: "직원 기본 정보.",
+      attendanceTitle: "근태 관리",
+      attendanceDesc: "출근/퇴근 기록.",
+      payrollTitle: "급여 관리",
+      payrollDesc: "월별 급여 현황.",
     },
   },
   ID: {
@@ -135,6 +154,9 @@ const i18n = {
       stockDesc: "Stok bahan baku / semi / jadi.",
       purchaseTitle: "Pembelian",
       purchaseDesc: "Data bahan masuk.",
+      purchaseFormCodePlaceholder: "Kode Material",
+      purchaseFormNamePlaceholder: "Nama Material",
+      purchaseFormQtyPlaceholder: "Qty",
       outgoingTitle: "Pengeluaran",
       outgoingDesc: "Data bahan keluar.",
       productionTitle: "Produksi",
@@ -151,6 +173,12 @@ const i18n = {
       logsDesc: "Riwayat aktivitas.",
       settingsTitle: "Pengaturan",
       settingsDesc: "Pengaturan dasar.",
+      employeesTitle: "Karyawan",
+      employeesDesc: "Data karyawan.",
+      attendanceTitle: "Absensi",
+      attendanceDesc: "Data masuk / pulang.",
+      payrollTitle: "Gaji",
+      payrollDesc: "Ringkasan gaji bulanan.",
     },
   },
 };
@@ -167,12 +195,12 @@ const MENU_ORDER = [
   "bom",
   "outsourcing",
   "finished",
+  "suppliers",   // 🔹 suppliers 로 통일
   "employees",
   "attendance",
   "payroll",
   "logs",
-  "suppliers",
-  "settings",
+  "settings"
 ];
 
 /*************************************************
@@ -1238,6 +1266,33 @@ const PageTemplates = {
     `;
   },
 
+  employees(lang) {
+    const t = i18n[lang].pages;
+    return `
+      <h2>${t.employeesTitle}</h2>
+      <p>${t.employeesDesc}</p>
+      <p>※ HR 모듈은 나중에 확장 예정입니다.</p>
+    `;
+  },
+
+  attendance(lang) {
+    const t = i18n[lang].pages;
+    return `
+      <h2>${t.attendanceTitle}</h2>
+      <p>${t.attendanceDesc}</p>
+      <p>※ 근태 기능은 추후에 실제 출근/퇴근 기록 기능으로 확장 가능합니다.</p>
+    `;
+  },
+
+  payroll(lang) {
+    const t = i18n[lang].pages;
+    return `
+      <h2>${t.payrollTitle}</h2>
+      <p>${t.payrollDesc}</p>
+      <p>※ 급여 기능은 추후에 HR 모듈과 연동 예정입니다.</p>
+    `;
+  },
+
   logs(lang) {
     const t = i18n[lang].pages;
     return `
@@ -1253,15 +1308,6 @@ const PageTemplates = {
     `;
   },
 
-  employees() {
-    return "<h2>직원 (추후 구현)</h2>";
-  },
-  attendance() {
-    return "<h2>근태 (추후 구현)</h2>";
-  },
-  payroll() {
-    return "<h2>급여 (추후 구현)</h2>";
-  },
   settings(lang) {
     const t = i18n[lang].pages;
     return `
