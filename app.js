@@ -1908,3 +1908,8 @@ document.getElementById("restoreFile").addEventListener("change", function (e) {
   };
   reader.readAsText(file);
 });
+window.backupData = backupData;
+window.restoreDataOpen = restoreDataOpen;
+<button onclick="backupData()" class="btn-secondary">Backup</button>
+<button onclick="restoreDataOpen()" class="btn-secondary">Restore</button>
+<input type="file" id="restoreFile" style="display:none;" accept=".json">
