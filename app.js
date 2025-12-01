@@ -738,3 +738,80 @@ function saveBOM() {
     alert("BOM Saved!");
     loadBOM();
 }
+function saveBOM() {
+    ...
+    loadBOM();
+}
+/* ============================
+      STOCK MODULE
+============================ */
+
+// LocalStorage Get/Save
+function getStock() {
+    return JSON.parse(localStorage.getItem("stock") || "[]");
+}
+function saveStock(data) {
+    localStorage.setItem("stock", JSON.stringify(data));
+}
+
+// 재고 업데이트 (입고)
+function updateStock(code, name, qty) {
+    let stock = getStock();
+    qty = Number(qty);
+
+    let item = stock.find(i => i.code === code);
+
+    if (item) {
+        item.qty += qty;
+        item.lastUpdate = new Date().toLocaleString();
+    } else {
+        stock.push({
+            code: code,
+            name: name,
+            qty: qty,
+            minQty: 0,
+            unit: "SET",
+            lastUpdate: new Date().toLocaleString()
+        });
+    }
+
+    saveStock(stock);
+    alert("재고가 업데이트되었습니다!");
+    loadPage("stock");
+}
+
+// 재고 테이블 출력
+function renderStockPage() {
+    const stock = getStock();
+    const tbody = document.getElementById("stockTableBody");
+    if (!tbody) return;
+
+    tbody.innerHTML = "";
+
+    stock.forEach(item => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${item.code}</td>
+                <td>${item.name}</td>
+                <td>${item.qty}</td>
+                <td>${item.minQty}</td>
+                <td>${item.unit}</td>
+                <td>${item.lastUpdate}</td>
+            </tr>
+        `;
+    });
+}
+
+// PURCHASE → 입고 폼 처리
+function onPurchase() {
+    const code = document.getElementById("pCode").value.trim();
+    const name = document.getElementById("pName").value.trim();
+    const qty = document.getElementById("pQty").value.trim();
+
+    if (!code || !name || !qty) {
+        alert("모든 값을 입력하세요.");
+        return;
+    }
+
+    updateStock(code, name, qty);
+}
