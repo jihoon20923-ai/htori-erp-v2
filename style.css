@@ -136,3 +136,105 @@ h2 {
   font-size: 11px;
   margin-left: 4px;
 }
+
+/* 카드 레이아웃 (대시보드용) */
+.cards {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+.card {
+  background: #2d2d2d;
+  border-radius: 6px;
+  padding: 12px 16px;
+  min-width: 180px;
+}
+.card-label {
+  font-size: 12px;
+  color: #bbbbbb;
+}
+.card-value {
+  margin-top: 4px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* 공통 테이블 스타일 */
+.erp-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.erp-table thead {
+  background: #333;
+}
+.erp-table th,
+.erp-table td {
+  border: 1px solid #444;
+  padding: 6px 8px;
+  text-align: left;
+}
+.erp-table tbody tr:nth-child(even) {
+  background: #222;
+}
+
+/* 버튼 / 툴바 */
+.table-toolbar {
+  margin-top: 8px;
+  margin-bottom: 4px;
+  display: flex;
+  gap: 8px;
+}
+.btn-primary,
+.btn-secondary {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn-primary {
+  background: #1976d2;
+  color: #fff;
+}
+.btn-secondary {
+  background: #555;
+  color: #fff;
+}
+
+/* 사이드바 active 표시 */
+.sidebar li.active {
+  background: #555;
+  font-weight: bold;
+}
+
+/* Settings 그리드 */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+.settings-item {
+  background: #262626;
+  padding: 10px 12px;
+  border-radius: 4px;
+}
+.settings-item label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+.settings-item input,
+.settings-item select {
+  width: 100%;
+  padding: 4px 6px;
+  font-size: 13px;
+}
+.settings-item small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #bbbbbb;
+}
