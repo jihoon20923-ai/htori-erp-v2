@@ -86,7 +86,12 @@ h2 {
   margin-top: 12px;
 }
 
-.table th,
+table th {
+    background-color: #5BC0F8;  /* 밝은 하늘색 */
+    color: #000;               /* 글자는 검정색 */
+    padding: 10px;
+}
+
 .table td {
   border: 1px solid #ddd;
   padding: 6px 8px;
