@@ -46,6 +46,11 @@
         <span class="lang-btn" onclick="setLanguage('EN')">EN</span>
         <span class="lang-btn" onclick="setLanguage('KR')">KR</span>
         <span class="lang-btn" onclick="setLanguage('ID')">ID</span>
+        <button onclick="backupData()" class="btn-secondary">Backup</button>
+<button onclick="restoreDataOpen()" class="btn-secondary">Restore</button>
+
+<input type="file" id="restoreFile" style="display:none;" accept=".json" />
+
     </div>
 </header>
 
