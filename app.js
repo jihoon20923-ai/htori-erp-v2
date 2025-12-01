@@ -168,6 +168,7 @@ const MENU_ORDER = [
   "purchase",
   "outgoing",
   "production",
+  "bom",
   "outsourcing",
   "finished",
   "employees",
