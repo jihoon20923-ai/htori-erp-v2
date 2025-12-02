@@ -1,3 +1,21 @@
+// ======================= 페이지 템플릿 저장소 =======================
+const PageTemplates = {
+    dashboard: "./pages/dashboard.html",
+    stock: "./pages/stock.html",
+    purchase: "./pages/purchase.html",
+    outgoing: "./pages/outgoing.html",
+    production: "./pages/production.html",
+    bom: "./pages/bom.html",
+    outsourcing: "./pages/outsourcing.html",
+    finished: "./pages/finished.html",
+    suppliers: "./pages/suppliers.html",
+    employees: "./pages/employees.html",
+    attendance: "./pages/attendance.html",
+    payroll: "./pages/payroll.html",
+    logs: "./pages/logs.html",
+    settings: "./pages/settings.html",
+};
+
 /*************************************************
  * PART 1 — GLOBAL + I18N + MENU
  *************************************************/
@@ -1966,3 +1984,15 @@ window.addEventListener("load", () => {
     loadPage(path.replace("/", ""));
   }
 });
+// ========== Supplier 삭제 기능 ========== 
+function deleteSupplier(index) {
+    const suppliers = JSON.parse(localStorage.getItem("suppliers") || "[]");
+
+    if (!confirm("정말 삭제하시겠습니까?")) return;
+
+    suppliers.splice(index, 1);
+    localStorage.setItem("suppliers", JSON.stringify(suppliers));
+
+    alert("Supplier deleted.");
+    renderSuppliers();
+}
