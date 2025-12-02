@@ -15,19 +15,17 @@
 
 <!-- ========================= HEADER ========================= -->
 <header class="header">
-    <div class="logo">HTORI</div>
+    <div class="logo">HTORI ERP</div>
 
     <div class="header-right">
         <span class="lang-btn" onclick="setLanguage('EN')">EN</span>
         <span class="lang-btn" onclick="setLanguage('KR')">KR</span>
         <span class="lang-btn" onclick="setLanguage('ID')">ID</span>
-
         <button onclick="backupData()" class="btn-secondary">Backup</button>
         <button onclick="restoreDataOpen()" class="btn-secondary">Restore</button>
         <input type="file" id="restoreFile" style="display:none;" accept=".json" />
     </div>
 </header>
-
 
 <!-- ========================= SIDEBAR ========================= -->
 <aside class="sidebar">
@@ -49,17 +47,16 @@
     </ul>
 </aside>
 
-
-<!-- ========================= PAGE CONTENT ========================= -->
+<!-- ========================= CONTENT ========================= -->
 <main id="content" class="content">
     <h2>Welcome to HTORI ERP</h2>
     <p>Select a menu from the left.</p>
 </main>
 
-
-<!-- ========================= SUPPLIER DETAIL MODAL ========================= -->
+<!-- ========================= SUPPLIER MODAL ========================= -->
 <div id="supplierModal" class="modal" style="display:none;">
   <div class="modal-content">
+
     <h3>Supplier Detail</h3>
 
     <div class="form-grid">
@@ -75,7 +72,6 @@
     </div>
 
     <h4>AP Payment (미지급 결제)</h4>
-
     <div class="form-row">
       <input id="apPayAmount" type="number" placeholder="Amount to Pay">
       <button onclick="payAP()" class="btn-mini">결제 등록</button>
@@ -85,11 +81,11 @@
       <button onclick="saveSupplierEdit()" class="btn-primary">저장</button>
       <button onclick="closeSupplierModal()" class="btn-secondary">닫기</button>
     </div>
+
   </div>
 </div>
 
-
-<!-- ========================= LOAD APP LOGIC ========================= -->
+<!-- ========================= APP LOGIC ========================= -->
 <script src="./app.js"></script>
 
 </body>
