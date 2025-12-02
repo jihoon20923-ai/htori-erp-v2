@@ -2001,5 +2001,6 @@ function deleteSupplier(index) {
     localStorage.setItem("suppliers", JSON.stringify(suppliers));
 
     alert("Supplier deleted.");
-    renderSuppliers();
+    renderSupplierPage();
+
 }
