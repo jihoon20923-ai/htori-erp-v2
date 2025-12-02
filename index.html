@@ -4,27 +4,18 @@
     <meta charset="UTF-8" />
     <title>HTORI ERP</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- CSS -->
     <link rel="stylesheet" href="./style.css" />
 
     <!-- PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <!-- GitHub Pages SPA Fix -->
-    <script>
-      (function() {
-        var redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect && redirect !== location.href) {
-          history.replaceState(null, null, redirect);
-        }
-      })();
-    </script>
 </head>
 
 <body>
 
-<!-- ========================= HEADER ========================= -->
 <header class="header">
     <div class="logo">HTORI ERP</div>
 
@@ -32,13 +23,13 @@
         <span class="lang-btn" onclick="setLanguage('EN')">EN</span>
         <span class="lang-btn" onclick="setLanguage('KR')">KR</span>
         <span class="lang-btn" onclick="setLanguage('ID')">ID</span>
+
         <button onclick="backupData()" class="btn-secondary">Backup</button>
         <button onclick="restoreDataOpen()" class="btn-secondary">Restore</button>
         <input type="file" id="restoreFile" style="display:none;" accept=".json" />
     </div>
 </header>
 
-<!-- ========================= SIDEBAR ========================= -->
 <aside class="sidebar">
     <ul>
         <li onclick="loadPage('dashboard')">Dashboard</li>
@@ -58,17 +49,16 @@
     </ul>
 </aside>
 
-<!-- ========================= CONTENT ========================= -->
 <main id="content" class="content">
     <h2>Welcome to HTORI ERP</h2>
     <p>Select a menu from the left.</p>
 </main>
 
-<!-- ========================= SUPPLIER MODAL ========================= -->
+<!-- SUPPLIER MODAL -->
 <div id="supplierModal" class="modal" style="display:none;">
   <div class="modal-content">
 
-    <h3>Supplier Detail</h3>
+    <h3 id="supplierModalTitle">Supplier Detail</h3>
 
     <div class="form-grid">
       <input id="editSupplierName" placeholder="Supplier Name" disabled>
@@ -82,21 +72,20 @@
       <input id="editBankHolder" placeholder="Bank Holder">
     </div>
 
-    <h4>AP Payment (미지급 결제)</h4>
+    <h4 id="apTitle">AP Payment (미지급 결제)</h4>
     <div class="form-row">
       <input id="apPayAmount" type="number" placeholder="Amount to Pay">
-      <button onclick="payAP()" class="btn-mini">결제 등록</button>
+      <button onclick="payAP()" class="btn-mini" id="btnApPay">결제 등록</button>
     </div>
 
     <div class="modal-btns">
-      <button onclick="saveSupplierEdit()" class="btn-primary">저장</button>
-      <button onclick="closeSupplierModal()" class="btn-secondary">닫기</button>
+      <button onclick="saveSupplierEdit()" class="btn-primary" id="btnSave">저장</button>
+      <button onclick="closeSupplierModal()" class="btn-secondary" id="btnClose">닫기</button>
     </div>
 
   </div>
 </div>
 
-<!-- ========================= APP LOGIC ========================= -->
 <script src="./app.js"></script>
 
 </body>
