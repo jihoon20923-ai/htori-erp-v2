@@ -5,7 +5,6 @@
   <title>HTORI ERP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- 기본 스타일 -->
   <style>
     body {
       margin: 0;
@@ -14,8 +13,6 @@
       display: flex;
       height: 100vh;
     }
-
-    /* --- SIDEBAR --- */
     .sidebar {
       width: 200px;
       background: #2f3542;
@@ -45,16 +42,12 @@
       background: #747d8c;
       font-weight: bold;
     }
-
-    /* --- MAIN WRAPPER --- */
     .main {
       flex-grow: 1;
       display: flex;
       flex-direction: column;
       height: 100%;
     }
-
-    /* --- HEADER --- */
     .header {
       background: white;
       padding: 12px 20px;
@@ -63,116 +56,13 @@
       align-items: center;
       border-bottom: 1px solid #ddd;
     }
-    .logo {
-      font-size: 20px;
-      font-weight: bold;
-    }
-    .lang-buttons button {
-      margin-left: 8px;
-      padding: 6px 12px;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
-      background: #dfe4ea;
-    }
-    .lang-buttons button:hover {
-      background: #ced6e0;
-    }
-
-    /* --- CONTENT --- */
     #content {
       padding: 20px;
       overflow-y: auto;
       flex-grow: 1;
     }
-
-    /* --- TABLE --- */
-    .erp-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-      background: white;
-    }
-    .erp-table th, .erp-table td {
-      padding: 8px;
-      border: 1px solid #ddd;
-      text-align: left;
-    }
-    .erp-table th {
-      background: #f1f2f6;
-    }
-
-    /* --- FORM ROW --- */
-    .form-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 15px;
-    }
-    .form-row input,
-    .form-row select {
-      padding: 8px;
-      font-size: 14px;
-    }
-
-    /* --- BUTTONS --- */
-    .btn-primary {
-      padding: 8px 14px;
-      background: #2ed573;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
-      font-weight: bold;
-    }
-    .btn-secondary {
-      padding: 8px 14px;
-      background: #70a1ff;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
-      font-weight: bold;
-    }
-    .btn-mini {
-      padding: 4px 8px;
-      font-size: 12px;
-      background: #ffa502;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    /* Dashboard Cards */
-    .cards {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-    .card {
-      background: white;
-      padding: 15px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      width: 180px;
-    }
-    .card-label {
-      font-size: 13px;
-      color: #555;
-    }
-    .card-value {
-      font-size: 24px;
-      font-weight: bold;
-    }
-
-    /* Chart Grid */
-    .chart-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
-      gap: 20px;
-    }
   </style>
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -180,23 +70,22 @@
   <!-- SIDEBAR -->
   <ul class="sidebar">
     <h2 class="logo">HTORI ERP</h2>
-    <li>Dashboard</li>
-    <li>Stock</li>
-    <li>Purchase</li>
-    <li>Outgoing</li>
-    <li>Production</li>
-    <li>BOM</li>
-    <li>Outsourcing</li>
-    <li>Finished Goods</li>
-    <li>Suppliers</li>
-    <li>Employees</li>
-    <li>Attendance</li>
-    <li>Payroll</li>
-    <li>Logs</li>
-    <li>Settings</li>
+    <li data-page="dashboard">Dashboard</li>
+    <li data-page="stock">Stock</li>
+    <li data-page="purchase">Purchase</li>
+    <li data-page="outgoing">Outgoing</li>
+    <li data-page="production">Production</li>
+    <li data-page="bom">BOM</li>
+    <li data-page="outsourcing">Outsourcing</li>
+    <li data-page="finished">Finished Goods</li>
+    <li data-page="suppliers">Suppliers</li>
+    <li data-page="employees">Employees</li>
+    <li data-page="attendance">Attendance</li>
+    <li data-page="payroll">Payroll</li>
+    <li data-page="logs">Logs</li>
+    <li data-page="settings">Settings</li>
   </ul>
 
-  <!-- MAIN -->
   <div class="main">
 
     <!-- HEADER -->
@@ -209,13 +98,52 @@
       </div>
     </div>
 
-    <!-- CONTENT -->
     <div id="content"></div>
-
   </div>
 
-  <!-- SCRIPT: ERP MAIN JS -->
+  <!-- APP JS -->
   <script src="app.js"></script>
+
+  <!-- PAGE LOADER -->
+  <script>
+  function loadPage(page) {
+    fetch(`pages/${page}.html`)
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('content').innerHTML = html;
+        state.page = page;
+        localStorage.setItem("htori_page", page);
+
+        if (page === "stock") renderStockPage();
+        else if (page === "purchase") renderPurchasePage();
+        else if (page === "outgoing") renderOutgoingPage();
+        else if (page === "production") renderProductionPage();
+        else if (page === "bom") renderBOMPage();
+        else if (page === "outsourcing") renderOutsourcingPage();
+        else if (page === "finished") renderFGPage();
+        else if (page === "logs") renderLogsPage();
+        else if (page === "suppliers") renderSupplierPage();
+        else if (page === "dashboard") renderDashboardPage();
+
+        highlightSidebar(page);
+      });
+  }
+
+  function highlightSidebar(page) {
+    document.querySelectorAll(".sidebar li").forEach(li => {
+      li.classList.toggle("active", li.dataset.page === page);
+    });
+  }
+
+  document.querySelectorAll(".sidebar li").forEach(li => {
+    li.addEventListener("click", () => {
+      loadPage(li.dataset.page);
+    });
+  });
+
+  // 첫 화면 로딩
+  loadPage(localStorage.getItem("htori_page") || "dashboard");
+  </script>
 
 </body>
 </html>
