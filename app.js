@@ -1837,25 +1837,32 @@ function renderDashboardPage() {
    메인 콘텐츠 렌더링
 ------------------------------ */
 function renderContent() {
-  const lang = state.lang;
-  const page = state.page || "dashboard";
-  const contentEl = document.getElementById("content");
+  const page = state.page;
+  const url = PageTemplates[page];
 
-  const tmpl = PageTemplates[page] || PageTemplates.dashboard;
-  contentEl.innerHTML = tmpl(lang);
+  fetch(url)
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("content").innerHTML = html;
 
-  // 페이지별 후처리
-  if (page === "stock")       renderStockPage();
-  else if (page === "purchase")   renderPurchasePage();
-  else if (page === "outgoing")   renderOutgoingPage();
-  else if (page === "production") renderProductionPage();
-  else if (page === "bom")        renderBOMPage();
-  else if (page === "outsourcing")renderOutsourcingPage();
-  else if (page === "finished")   renderFGPage();
-  else if (page === "logs")       renderLogsPage();
-  else if (page === "suppliers")  renderSupplierPage();
-  else if (page === "dashboard")  renderDashboardPage();
+      // 페이지 후처리 실행
+      if (page === "stock")       renderStockPage();
+      else if (page === "purchase")   renderPurchasePage();
+      else if (page === "outgoing")   renderOutgoingPage();
+      else if (page === "production") renderProductionPage();
+      else if (page === "bom")        renderBOMPage();
+      else if (page === "outsourcing")renderOutsourcingPage();
+      else if (page === "finished")   renderFGPage?.();
+      else if (page === "logs")       renderLogsPage();
+      else if (page === "suppliers")  renderSupplierPage();
+      else if (page === "dashboard")  renderDashboardPage();
+    })
+    .catch(err => {
+      document.getElementById("content").innerHTML = `<h2>Load Error</h2>`;
+      console.error(err);
+    });
 }
+
 
 /* -----------------------------
    사이드바 렌더링 (언어에 따라 메뉴 텍스트 변경)
