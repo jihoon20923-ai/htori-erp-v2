@@ -1973,24 +1973,7 @@ window.exportSuppliersPDF = exportSuppliersPDF;
 window.backupData = backupData;
 window.restoreDataOpen = restoreDataOpen;
 
-/*************************************************
- * (선택) 해시 기반 라우팅 지원
- *  - URL을 /#!/purchase 이런 식으로 써도 동작하게
- *************************************************/
-window.addEventListener("hashchange", () => {
-  const path = location.hash.replace("#!", "");
-  if (path && path.length > 1) {
-    loadPage(path.replace("/", ""));
-  }
-});
 
-// 첫 로드시 hash 있으면 반영
-window.addEventListener("load", () => {
-  const path = location.hash.replace("#!", "");
-  if (path && path.length > 1) {
-    loadPage(path.replace("/", ""));
-  }
-});
 // ========== Supplier 삭제 기능 ========== 
 function deleteSupplier(index) {
     const suppliers = JSON.parse(localStorage.getItem("suppliers") || "[]");
