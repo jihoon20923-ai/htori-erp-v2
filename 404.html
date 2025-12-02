@@ -1,15 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8" />
   <title>HTORI ERP</title>
-  <link rel="stylesheet" href="./style.css" />
-</head>
-
-<body>
   <script>
-    // GitHub Pages SPA redirect fix
-    window.location.href = "/";
+    // GitHub Pages SPA Redirect
+    (function() {
+      var redirect = sessionStorage.redirect = location.href;
+      var base = location.origin + location.pathname.replace(/\/404\.html$/, "");
+      window.location.replace(base + "/");
+    })();
   </script>
+</head>
+<body>
+Redirecting...
 </body>
 </html>
