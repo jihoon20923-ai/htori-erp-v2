@@ -1845,21 +1845,21 @@ function renderContent() {
     .then(html => {
       document.getElementById("content").innerHTML = html;
 
-      // 페이지 후처리 실행
-      if (page === "stock")       renderStockPage();
-      else if (page === "purchase")   renderPurchasePage();
-      else if (page === "outgoing")   renderOutgoingPage();
+      // 페이지 후처리
+      if (page === "stock") renderStockPage();
+      else if (page === "purchase") renderPurchasePage();
+      else if (page === "outgoing") renderOutgoingPage();
       else if (page === "production") renderProductionPage();
-      else if (page === "bom")        renderBOMPage();
-      else if (page === "outsourcing")renderOutsourcingPage();
-      else if (page === "finished")   renderFGPage?.();
-      else if (page === "logs")       renderLogsPage();
-      else if (page === "suppliers")  renderSupplierPage();
-      else if (page === "dashboard")  renderDashboardPage();
+      else if (page === "bom") renderBOMPage();
+      else if (page === "outsourcing") renderOutsourcingPage();
+      else if (page === "finished" && typeof renderFGPage === "function") renderFGPage();
+      else if (page === "logs") renderLogsPage();
+      else if (page === "suppliers") renderSupplierPage();
+      else if (page === "dashboard") renderDashboardPage();
     })
     .catch(err => {
-      document.getElementById("content").innerHTML = `<h2>Load Error</h2>`;
-      console.error(err);
+      console.error("Render Error:", err);
+      document.getElementById("content").innerHTML = "<h2>Load Error</h2>";
     });
 }
 
