@@ -52,14 +52,21 @@
   <!-- JS 로딩 -->
   <script src="app.js"></script>
 
-  <script>
-    /* ⭐ 사이드바 클릭 이벤트 */
-    document.querySelectorAll(".sidebar li").forEach(li => {
-      li.addEventListener("click", () => {
-        const page = li.dataset.page;
-        if (page) loadPage(page);
-      });
+<script src="app.js"></script>
+
+<script>
+  /* 사이드바 클릭 */
+  document.querySelectorAll(".sidebar li").forEach(li => {
+    li.addEventListener("click", () => {
+      const page = li.dataset.page;
+      if (page) loadPage(page);
     });
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    rerenderAll();
+  });
+</script>
 
     /* 초기 렌더링 */
     document.addEventListener("DOMContentLoaded", () => {
