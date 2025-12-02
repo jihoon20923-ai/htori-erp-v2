@@ -1971,3 +1971,18 @@ document.getElementById("restoreFile").addEventListener("change", function (e) {
 window.backupData = backupData;
 window.restoreDataOpen = restoreDataOpen;
 
+// SPA hash routing load
+window.addEventListener("hashchange", () => {
+  const path = location.hash.replace("#!", "");
+  if (path.length > 1) {
+    loadPage(path.replace("/", ""));
+  }
+});
+
+// 첫 로드 시에도 처리
+window.addEventListener("load", () => {
+  const path = location.hash.replace("#!", "");
+  if (path.length > 1) {
+    loadPage(path.replace("/", ""));
+  }
+});
