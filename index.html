@@ -21,6 +21,7 @@
         <span class="lang-btn" onclick="setLanguage('EN')">EN</span>
         <span class="lang-btn" onclick="setLanguage('KR')">KR</span>
         <span class="lang-btn" onclick="setLanguage('ID')">ID</span>
+
         <button onclick="backupData()" class="btn-secondary">Backup</button>
         <button onclick="restoreDataOpen()" class="btn-secondary">Restore</button>
         <input type="file" id="restoreFile" style="display:none;" accept=".json" />
@@ -30,20 +31,20 @@
 <!-- ========================= SIDEBAR ========================= -->
 <aside class="sidebar">
     <ul>
-        <li onclick="loadPage('dashboard')">Dashboard</li>
-        <li onclick="loadPage('stock')">Stock</li>
-        <li onclick="loadPage('purchase')">Purchase</li>
-        <li onclick="loadPage('outgoing')">Outgoing</li>
-        <li onclick="loadPage('production')">Production</li>
-        <li onclick="loadPage('bom')">BOM</li>
-        <li onclick="loadPage('outsourcing')">Outsourcing</li>
-        <li onclick="loadPage('finished')">Finished Goods</li>
-        <li onclick="loadPage('suppliers')">Suppliers</li>
-        <li onclick="loadPage('employees')">Employees</li>
-        <li onclick="loadPage('attendance')">Attendance</li>
-        <li onclick="loadPage('payroll')">Payroll</li>
-        <li onclick="loadPage('logs')">Logs</li>
-        <li onclick="loadPage('settings')">Settings</li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('dashboard');">Dashboard</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('stock');">Stock</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('purchase');">Purchase</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('outgoing');">Outgoing</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('production');">Production</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('bom');">BOM</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('outsourcing');">Outsourcing</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('finished');">Finished Goods</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('suppliers');">Suppliers</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('employees');">Employees</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('attendance');">Attendance</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('payroll');">Payroll</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('logs');">Logs</a></li>
+        <li><a href="#" onclick="event.preventDefault(); loadPage('settings');">Settings</a></li>
     </ul>
 </aside>
 
