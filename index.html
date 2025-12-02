@@ -1,100 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>HTORI ERP</title>
+    <meta charset="UTF-8" />
+    <title>HTORI ERP</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./style.css" />
 
-  <!-- 메인 CSS -->
-  <link rel="stylesheet" href="./style.css" />
-
-  <!-- Chart.js (대시보드 + Supplier 그래프용) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- PDF Export (Supplier PDF용) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-  <!-- ========================= HEADER ========================= -->
-  <header class="header">
+<header class="header">
     <div class="logo">HTORI ERP</div>
 
     <div class="header-right">
-      <!-- 언어 변경 버튼 -->
-      <span class="lang-btn" onclick="setLanguage('EN')">EN</span>
-      <span class="lang-btn" onclick="setLanguage('KR')">KR</span>
-      <span class="lang-btn" onclick="setLanguage('ID')">ID</span>
-
-      <!-- 백업 / 복원 -->
-      <button onclick="backupData()" class="btn-secondary">Backup</button>
-      <button onclick="restoreDataOpen()" class="btn-secondary">Restore</button>
-      <input type="file" id="restoreFile" style="display:none;" accept=".json" />
+        <span class="lang-btn" onclick="setLanguage('EN')">EN</span>
+        <span class="lang-btn" onclick="setLanguage('KR')">KR</span>
+        <span class="lang-btn" onclick="setLanguage('ID')">ID</span>
+        <button onclick="backupData()" class="btn-secondary">Backup</button>
+        <button onclick="restoreDataOpen()" class="btn-secondary">Restore</button>
+        <input type="file" id="restoreFile" style="display:none;" accept=".json" />
     </div>
-  </header>
+</header>
 
-  <!-- ========================= SIDEBAR ========================= -->
-  <aside class="sidebar">
+<aside class="sidebar">
     <ul>
-      <!-- 이 텍스트들은 처음에만 의미 있고,
-           실제 표시되는 글자는 app.js의 renderSidebar()가 언어에 맞게 다시 넣어줌 -->
-      <li onclick="loadPage('dashboard')">Dashboard</li>
-      <li onclick="loadPage('stock')">Stock</li>
-      <li onclick="loadPage('purchase')">Purchase</li>
-      <li onclick="loadPage('outgoing')">Outgoing</li>
-      <li onclick="loadPage('production')">Production</li>
-      <li onclick="loadPage('bom')">BOM</li>
-      <li onclick="loadPage('outsourcing')">Outsourcing</li>
-      <li onclick="loadPage('finished')">Finished Goods</li>
-      <li onclick="loadPage('suppliers')">Suppliers</li>
-      <li onclick="loadPage('employees')">Employees</li>
-      <li onclick="loadPage('attendance')">Attendance</li>
-      <li onclick="loadPage('payroll')">Payroll</li>
-      <li onclick="loadPage('logs')">Logs</li>
-      <li onclick="loadPage('settings')">Settings</li>
+        <li onclick="loadPage('dashboard')">Dashboard</li>
+        <li onclick="loadPage('stock')">Stock</li>
+        <li onclick="loadPage('purchase')">Purchase</li>
+        <li onclick="loadPage('outgoing')">Outgoing</li>
+        <li onclick="loadPage('production')">Production</li>
+        <li onclick="loadPage('bom')">BOM</li>
+        <li onclick="loadPage('outsourcing')">Outsourcing</li>
+        <li onclick="loadPage('finished')">Finished Goods</li>
+        <li onclick="loadPage('suppliers')">Suppliers</li>
+        <li onclick="loadPage('employees')">Employees</li>
+        <li onclick="loadPage('attendance')">Attendance</li>
+        <li onclick="loadPage('payroll')">Payroll</li>
+        <li onclick="loadPage('logs')">Logs</li>
+        <li onclick="loadPage('settings')">Settings</li>
     </ul>
-  </aside>
+</aside>
 
-  <!-- ========================= CONTENT ========================= -->
-  <main id="content" class="content">
-    <!-- 이 부분은 app.js의 PageTemplates 가 전부 덮어씀 -->
+<main id="content" class="content">
     <h2>Welcome to HTORI ERP</h2>
-    <p>Select a menu from the left.</p>
-  </main>
+</main>
 
-  <!-- ========================= SUPPLIER MODAL ========================= -->
-  <div id="supplierModal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <h3>Supplier Detail</h3>
+<div id="supplierModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h3>Supplier Detail</h3>
 
-      <div class="form-grid">
-        <input id="editSupplierName" placeholder="Supplier Name" disabled>
-        <input id="editVendorName" placeholder="Vendor Name">
-        <input id="editContactPerson" placeholder="Contact Person">
-        <input id="editEmail" placeholder="Email">
-        <input id="editAddress" placeholder="Address">
-        <input id="editPhone" placeholder="Phone">
-        <input id="editBankName" placeholder="Bank Name">
-        <input id="editBankAccount" placeholder="Bank Account">
-        <input id="editBankHolder" placeholder="Bank Holder">
-      </div>
+    <div class="form-grid">
+      <input id="editSupplierName" placeholder="Supplier Name" disabled>
+      <input id="editVendorName" placeholder="Vendor Name">
+      <input id="editContactPerson" placeholder="Contact Person">
+      <input id="editEmail" placeholder="Email">
+      <input id="editAddress" placeholder="Address">
+      <input id="editPhone" placeholder="Phone">
+      <input id="editBankName" placeholder="Bank Name">
+      <input id="editBankAccount" placeholder="Bank Account">
+      <input id="editBankHolder" placeholder="Bank Holder">
+    </div>
 
-      <h4>AP Payment (미지급 결제)</h4>
-      <div class="form-row">
-        <input id="apPayAmount" type="number" placeholder="Amount to Pay">
-        <button onclick="payAP()" class="btn-mini">결제 등록</button>
-      </div>
+    <h4>AP Payment</h4>
+    <div class="form-row">
+      <input id="apPayAmount" type="number" placeholder="Amount to Pay">
+      <button onclick="payAP()" class="btn-mini">Register</button>
+    </div>
 
-      <div class="modal-btns">
-        <button onclick="saveSupplierEdit()" class="btn-primary">저장</button>
-        <button onclick="closeSupplierModal()" class="btn-secondary">닫기</button>
-      </div>
+    <div class="modal-btns">
+      <button onclick="saveSupplierEdit()" class="btn-primary">Save</button>
+      <button onclick="closeSupplierModal()" class="btn-secondary">Close</button>
     </div>
   </div>
+</div>
 
-  <!-- ========================= APP LOGIC ========================= -->
-  <script src="./app.js"></script>
+<script src="./app.js"></script>
 </body>
 </html>
