@@ -1,92 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8" />
-    <title>HTORI ERP</title>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="./style.css" />
-
-    <!-- PDF Export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <script>
+    // GitHub Pages SPA Fix
+    const path = window.location.pathname.replace("/htori-erp-v2", "");
+    window.location.replace("/htori-erp-v2/" + "#!" + path);
+  </script>
 </head>
-
 <body>
-
-<header class="header">
-    <div class="logo">HTORI ERP</div>
-
-    <div class="header-right">
-        <span class="lang-btn" onclick="setLanguage('EN')">EN</span>
-        <span class="lang-btn" onclick="setLanguage('KR')">KR</span>
-        <span class="lang-btn" onclick="setLanguage('ID')">ID</span>
-
-        <button onclick="backupData()" class="btn-secondary">Backup</button>
-        <button onclick="restoreDataOpen()" class="btn-secondary">Restore</button>
-        <input type="file" id="restoreFile" style="display:none;" accept=".json" />
-    </div>
-</header>
-
-<aside class="sidebar">
-    <ul>
-        <li onclick="loadPage('dashboard')">Dashboard</li>
-        <li onclick="loadPage('stock')">Stock</li>
-        <li onclick="loadPage('purchase')">Purchase</li>
-        <li onclick="loadPage('outgoing')">Outgoing</li>
-        <li onclick="loadPage('production')">Production</li>
-        <li onclick="loadPage('bom')">BOM</li>
-        <li onclick="loadPage('outsourcing')">Outsourcing</li>
-        <li onclick="loadPage('finished')">Finished Goods</li>
-        <li onclick="loadPage('suppliers')">Suppliers</li>
-        <li onclick="loadPage('employees')">Employees</li>
-        <li onclick="loadPage('attendance')">Attendance</li>
-        <li onclick="loadPage('payroll')">Payroll</li>
-        <li onclick="loadPage('logs')">Logs</li>
-        <li onclick="loadPage('settings')">Settings</li>
-    </ul>
-</aside>
-
-<main id="content" class="content">
-    <h2>Welcome to HTORI ERP</h2>
-    <p>Select a menu from the left.</p>
-</main>
-
-<!-- SUPPLIER MODAL -->
-<div id="supplierModal" class="modal" style="display:none;">
-  <div class="modal-content">
-
-    <h3 id="supplierModalTitle">Supplier Detail</h3>
-
-    <div class="form-grid">
-      <input id="editSupplierName" placeholder="Supplier Name" disabled>
-      <input id="editVendorName" placeholder="Vendor Name">
-      <input id="editContactPerson" placeholder="Contact Person">
-      <input id="editEmail" placeholder="Email">
-      <input id="editAddress" placeholder="Address">
-      <input id="editPhone" placeholder="Phone">
-      <input id="editBankName" placeholder="Bank Name">
-      <input id="editBankAccount" placeholder="Bank Account">
-      <input id="editBankHolder" placeholder="Bank Holder">
-    </div>
-
-    <h4 id="apTitle">AP Payment (미지급 결제)</h4>
-    <div class="form-row">
-      <input id="apPayAmount" type="number" placeholder="Amount to Pay">
-      <button onclick="payAP()" class="btn-mini" id="btnApPay">결제 등록</button>
-    </div>
-
-    <div class="modal-btns">
-      <button onclick="saveSupplierEdit()" class="btn-primary" id="btnSave">저장</button>
-      <button onclick="closeSupplierModal()" class="btn-secondary" id="btnClose">닫기</button>
-    </div>
-
-  </div>
-</div>
-
-<script src="./app.js"></script>
-
+  Redirecting...
 </body>
 </html>
