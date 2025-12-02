@@ -1,20 +1,21 @@
 // ======================= 페이지 템플릿 저장소 =======================
 const PageTemplates = {
-    dashboard: "./pages/dashboard.html",
-    stock: "./pages/stock.html",
-    purchase: "./pages/purchase.html",
-    outgoing: "./pages/outgoing.html",
-    production: "./pages/production.html",
-    bom: "./pages/bom.html",
-    outsourcing: "./pages/outsourcing.html",
-    finished: "./pages/finished.html",
-    suppliers: "./pages/suppliers.html",
-    employees: "./pages/employees.html",
-    attendance: "./pages/attendance.html",
-    payroll: "./pages/payroll.html",
-    logs: "./pages/logs.html",
-    settings: "./pages/settings.html",
+  dashboard: () => fetch("./pages/dashboard.html").then(r => r.text()),
+  stock: () => fetch("./pages/stock.html").then(r => r.text()),
+  purchase: () => fetch("./pages/purchase.html").then(r => r.text()),
+  outgoing: () => fetch("./pages/outgoing.html").then(r => r.text()),
+  production: () => fetch("./pages/production.html").then(r => r.text()),
+  bom: () => fetch("./pages/bom.html").then(r => r.text()),
+  outsourcing: () => fetch("./pages/outsourcing.html").then(r => r.text()),
+  finished: () => fetch("./pages/finished.html").then(r => r.text()),
+  suppliers: () => fetch("./pages/suppliers.html").then(r => r.text()),
+  employees: () => fetch("./pages/employees.html").then(r => r.text()),
+  attendance: () => fetch("./pages/attendance.html").then(r => r.text()),
+  payroll: () => fetch("./pages/payroll.html").then(r => r.text()),
+  logs: () => fetch("./pages/logs.html").then(r => r.text()),
+  settings: () => fetch("./pages/settings.html").then(r => r.text()),
 };
+
 
 /*************************************************
  * PART 1 — GLOBAL + I18N + MENU
@@ -1837,30 +1838,28 @@ function renderDashboardPage() {
    메인 콘텐츠 렌더링
 ------------------------------ */
 function renderContent() {
-  const page = state.page;
-  const url = PageTemplates[page];
+  const lang = state.lang;
+  const page = state.page || "dashboard";
+  const contentEl = document.getElementById("content");
 
-  fetch(url)
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById("content").innerHTML = html;
+  const tmpl = PageTemplates[page];
 
-      // 페이지 후처리
-      if (page === "stock") renderStockPage();
-      else if (page === "purchase") renderPurchasePage();
-      else if (page === "outgoing") renderOutgoingPage();
-      else if (page === "production") renderProductionPage();
-      else if (page === "bom") renderBOMPage();
-      else if (page === "outsourcing") renderOutsourcingPage();
-      else if (page === "finished" && typeof renderFGPage === "function") renderFGPage();
-      else if (page === "logs") renderLogsPage();
-      else if (page === "suppliers") renderSupplierPage();
-      else if (page === "dashboard") renderDashboardPage();
-    })
-    .catch(err => {
-      console.error("Render Error:", err);
-      document.getElementById("content").innerHTML = "<h2>Load Error</h2>";
-    });
+  if (!tmpl) return;
+
+  tmpl().then(html => {
+    contentEl.innerHTML = html;
+
+    if (page === "stock") renderStockPage();
+    else if (page === "purchase") renderPurchasePage();
+    else if (page === "outgoing") renderOutgoingPage();
+    else if (page === "production") renderProductionPage();
+    else if (page === "bom") renderBOMPage();
+    else if (page === "outsourcing") renderOutsourcingPage();
+    else if (page === "finished") renderFGPage();
+    else if (page === "logs") renderLogsPage();
+    else if (page === "suppliers") renderSupplierPage();
+    else if (page === "dashboard") renderDashboardPage();
+  });
 }
 
 
