@@ -90,6 +90,12 @@
 
 </body>
 </html>
-<button onclick="backupData()" class="btn-secondary">Backup</button>
-<button onclick="restoreDataOpen()" class="btn-secondary">Restore</button>
+<button onclick="saveSupplierEdit()" class="btn-primary">
+  ${i18n[lang].common.save}
+</button>
+
+<button onclick="closeSupplierModal()" class="btn-secondary">
+  ${i18n[lang].common.close}
+</button>
+
 <input type="file" id="restoreFile" style="display:none;" accept=".json"/>
