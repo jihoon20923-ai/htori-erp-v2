@@ -41,37 +41,4 @@
       <div class="lang-buttons">
         <button onclick="setLanguage('EN')">EN</button>
         <button onclick="setLanguage('KR')">KR</button>
-        <button onclick="setLanguage('ID')">ID</button>
-      </div>
-    </div>
-
-    <!-- PAGE CONTENT -->
-    <div id="content"></div>
-  </div>
-
-  <!-- JS 로딩 -->
-  <script src="app.js"></script>
-
-<script src="app.js"></script>
-
-<script>
-  /* 사이드바 클릭 */
-  document.querySelectorAll(".sidebar li").forEach(li => {
-    li.addEventListener("click", () => {
-      const page = li.dataset.page;
-      if (page) loadPage(page);
-    });
-  });
-
-  document.addEventListener("DOMContentLoaded", () => {
-    rerenderAll();
-  });
-</script>
-
-    /* 초기 렌더링 */
-    document.addEventListener("DOMContentLoaded", () => {
-      rerenderAll(); // app.js 내부 함수
-    });
-  </script>
-</body>
-</html>
+        <button onclick="setLanguage('ID')">ID<
