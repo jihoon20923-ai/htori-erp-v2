@@ -83,6 +83,18 @@ const i18n = {
       payrollTitle: "Payroll",
       payrollDesc: "Monthly payroll overview.",
     },
+    common: {
+  add: "Add",
+  edit: "Edit",
+  delete: "Delete",
+  save: "Save",
+  close: "Close",
+  register: "Register",
+  pdfExport: "PDF Export",
+  excelDownload: "Excel Download",
+  productCode: "Product Code",     // Production placeholder
+}
+
   },
   KR: {
     appTitle: "HTORI ERP",
@@ -142,6 +154,18 @@ const i18n = {
       payrollTitle: "급여 관리",
       payrollDesc: "월별 급여 현황.",
     },
+    common: {
+  add: "추가",
+  edit: "수정",
+  delete: "삭제",
+  save: "저장",
+  close: "닫기",
+  register: "등록",
+  pdfExport: "PDF 다운로드",
+  excelDownload: "Excel 다운로드",
+  productCode: "완제품 코드",
+}
+
   },
   ID: {
     appTitle: "HTORI ERP",
@@ -161,6 +185,17 @@ const i18n = {
       suppliers: "Pemasok",
       settings: "Pengaturan",
     },
+    common: {
+  add: "Tambah",
+  edit: "Edit",
+  delete: "Hapus",
+  save: "Simpan",
+  close: "Tutup",
+  register: "Daftar",
+  pdfExport: "Ekspor PDF",
+  excelDownload: "Unduh Excel",
+  productCode: "Kode Produk",
+}
     pages: {
       dashboardTitle: "Dashboard",
       dashboardDesc: "Indikator dan grafik pabrik.",
@@ -1496,8 +1531,14 @@ const PageTemplates = {
         <select id="pSupplier">
           ${suppliers.map(s => `<option value="${s}">${s}</option>`).join("")}
         </select>
-        <button onclick="onPurchase()" class="btn-primary">입고 등록</button>
-        <button onclick="downloadPurchaseCSV()" class="btn-secondary">Excel 다운로드</button>
+        <button onclick="onPurchase()" class="btn-primary">
+  ${i18n[lang].common.register}
+</button>
+
+<button onclick="downloadPurchaseCSV()" class="btn-secondary">
+  ${i18n[lang].common.excelDownload}
+</button>
+
       </div>
 
       <table class="erp-table" style="margin-top:20px;">
@@ -1522,8 +1563,14 @@ const PageTemplates = {
         <input id="oCode" placeholder="Code">
         <input id="oName" placeholder="Name">
         <input id="oQty" type="number" placeholder="Qty">
-        <button onclick="onOutgoing()" class="btn-secondary">출고</button>
-        <button onclick="downloadOutgoingCSV()" class="btn-secondary">Excel 다운로드</button>
+        <button onclick="onOutgoing()" class="btn-secondary">
+  ${i18n[lang].common.register}
+</button>
+
+<button onclick="downloadOutgoingCSV()" class="btn-secondary">
+  ${i18n[lang].common.excelDownload}
+</button>
+
       </div>
 
       <table class="erp-table" style="margin-top:20px;">
@@ -1542,10 +1589,17 @@ const PageTemplates = {
       <p>${t.productionDesc}</p>
 
       <div class="form-row">
-        <input id="prodProduct" placeholder="Product (완제품 코드)">
+       <input id="prodProduct" placeholder="${i18n[lang].common.productCode}">
+
         <input id="prodQty" type="number" placeholder="Qty">
-        <button onclick="onProduction()" class="btn-primary">생산 등록</button>
-        <button onclick="downloadProductionCSV()" class="btn-secondary">Excel 다운로드</button>
+        <button onclick="onProduction()" class="btn-primary">
+  ${i18n[lang].common.register}
+</button>
+
+<button onclick="downloadProductionCSV()" class="btn-secondary">
+  ${i18n[lang].common.excelDownload}
+</button>
+
       </div>
 
       <table class="erp-table" style="margin-top:20px;">
@@ -1649,8 +1703,14 @@ const PageTemplates = {
       <input id="supplierBankName" placeholder="Bank Name" style="min-width:120px;">
       <input id="supplierBankAccount" placeholder="Account Number" style="min-width:140px;">
       <input id="supplierBankHolder" placeholder="Account Holder" style="min-width:140px;">
-      <button onclick="addSupplier()" class="btn-primary">추가</button>
-      <button onclick="exportSuppliersPDF()" class="btn-secondary">PDF Export</button>
+      <button onclick="addSupplier()" class="btn-primary">
+  ${i18n[lang].common.add}
+</button>
+
+<button onclick="exportSuppliersPDF()" class="btn-secondary">
+  ${i18n[lang].common.pdfExport}
+</button>
+
     </div>
 
     <div id="supplierSection" style="margin-top:16px;">
