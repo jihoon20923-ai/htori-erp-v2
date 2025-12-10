@@ -1,44 +1,47 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>HTORI ERP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <!-- 기본 스타일 -->
-  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- SheetJS (Excel Upload) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <!-- SIDEBAR -->
-  <ul class="sidebar">
-    <h2 class="logo">HTORI ERP</h2>
-    <li data-page="dashboard">Dashboard</li>
-    <li data-page="stock">Stock</li>
-    <li data-page="purchase">Purchase</li>
-    <li data-page="outgoing">Outgoing</li>
-    <li data-page="production">Production</li>
-    <li data-page="bom">BOM</li>
-    <li data-page="outsourcing">Outsourcing</li>
-    <li data-page="finished">Finished Goods</li>
-    <li data-page="suppliers">Suppliers</li>
-    <li data-page="employees">Employees</li>
-    <li data-page="attendance">Attendance</li>
-    <li data-page="payroll">Payroll</li>
-    <li data-page="logs">Logs</li>
-    <li data-page="settings">Settings</li>
-  </ul>
 
-  <!-- MAIN WRAPPER -->
-  <div class="main">
+<!-- ✅ LOGIN -->
+<div id="loginBox" class="login-box">
+  <h2>HTORI ERP LOGIN</h2>
+  <input id="loginId" placeholder="ID">
+  <input id="loginPw" type="password" placeholder="Password">
+  <button onclick="login()">LOGIN</button>
+</div>
 
-    <!-- HEADER -->
-    <div class="header">
-      <div class="logo">HTORI ERP</div>
-      <div class="lang-buttons">
-        <button onclick="setLanguage('EN')">EN</button>
-        <button onclick="setLanguage('KR')">KR</button>
-        <button onclick="setLanguage('ID')">ID<
+<!-- ✅ ERP -->
+<div id="erp" class="hidden">
+
+<header class="header">
+  <div class="logo">HTORI ERP</div>
+
+  <div class="lang-buttons">
+    <button onclick="setLanguage('EN')">EN</button>
+    <button onclick="setLanguage('KR')">KR</button>
+    <button onclick="setLanguage('ID')">ID</button>
+  </div>
+</header>
+
+<aside id="sidebar" class="sidebar"></aside>
+<main id="content"></main>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
