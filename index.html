@@ -39,6 +39,21 @@
 
 <aside id="sidebar" class="sidebar"></aside>
 <main id="content"></main>
+<!-- ===== A-1: Excel → Material Upload ===== -->
+<div id="page-material-upload" class="hidden">
+  <h2>Material Upload (Excel)</h2>
+
+  <div class="form-row">
+    <input type="file" id="materialExcelFile" accept=".xlsx,.xls">
+    <button onclick="previewMaterialExcel()">Preview</button>
+    <button onclick="uploadMaterialExcel()">Upload</button>
+  </div>
+
+  <table>
+    <thead id="materialPreviewHead"></thead>
+    <tbody id="materialPreviewBody"></tbody>
+  </table>
+</div>
 
 </div>
 
