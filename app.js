@@ -125,3 +125,99 @@ function uploadExcel(){
   };
   reader.readAsArrayBuffer(file);
 }
+/*************************************************
+ A-1 ✅ Excel → Material Master Auto Upload
+**************************************************/
+
+let materialExcelData = [];
+
+/* ✅ 엑셀 미리보기 */
+function previewMaterialExcel(){
+  const file = document.getElementById("materialExcelFile").files[0];
+  if(!file){ alert("파일 선택"); return; }
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const data = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(data, { type:"array" });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+    materialExcelData = XLSX.utils.sheet_to_json(sheet, { header:1 });
+
+    const head = document.getElementById("materialPreviewHead");
+    const body = document.getElementById("materialPreviewBody");
+
+    head.innerHTML = "";
+    body.innerHTML = "";
+
+    // 헤더
+    let htr = "<tr>";
+    materialExcelData[0].forEach(h => htr += `<th>${h}</th>`);
+    htr += "</tr>";
+    head.innerHTML = htr;
+
+    // 데이터 미리보기 (20줄)
+    materialExcelData.slice(1,21).forEach(r=>{
+      let tr="<tr>";
+      r.forEach(c => tr+=`<td>${c ?? ""}</td>`);
+      tr+="</tr>";
+      body.innerHTML += tr;
+    });
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+
+/* ✅ 엑셀 → Firebase materials 자동 업로드 */
+function uploadMaterialExcel(){
+  if(materialExcelData.length < 2){
+    alert("미리보기 먼저 실행");
+    return;
+  }
+
+  const headers = materialExcelData[0];
+  const rows = materialExcelData.slice(1);
+
+  db.ref("materials").once("value").then(snap=>{
+    const existing = snap.val() || {};
+    const existCodes = Object.values(existing).map(x => x.code);
+
+    // ✅ 1차 검증 (중복 + 필수값)
+    for(const r of rows){
+      const obj = {};
+      headers.forEach((h,i)=> obj[h] = r[i]);
+
+      if(!obj.code || !obj.name || !obj.category){
+        alert("필수값 누락 (code / name / category)");
+        return;
+      }
+
+      if(existCodes.includes(obj.code)){
+        alert("❌ 중복 코드 발견: " + obj.code);
+        return;
+      }
+    }
+
+    // ✅ 최종 저장
+    rows.forEach(r=>{
+      const obj = {};
+      headers.forEach((h,i)=> obj[h] = r[i]);
+
+      db.ref("materials").push({
+        code: obj.code,
+        name: obj.name,
+        category: obj.category,
+        unit: obj.unit || "PCS",
+        qty: Number(obj.qty || 0),
+        safetyStock: Number(obj.safetyStock || 0),
+        currency: obj.currency || "USD",
+        memo: obj.memo || "",
+        createdAt: new Date().toISOString()
+      });
+    });
+
+    alert("✅ Material Master 업로드 완료");
+  });
+}
+
