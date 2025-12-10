@@ -68,15 +68,16 @@ function setLanguage(l){
  MENU
 ***********************/
 function renderMenu(){
-  sidebar.innerHTML="";
+  sidebar.innerHTML = "";
 
-  ["dashboard","stock","order","excel"].forEach(p=>{
+  ["dashboard","stock","order","excel","material-upload"].forEach(p=>{
     const b = document.createElement("button");
-    b.innerText = T[lang][p];
+    b.innerText = T[lang][p] || p;   // 다국어 없는 항목 대비
     b.onclick = ()=>showPage(p);
     sidebar.appendChild(b);
   });
 }
+
 
 /***********************
  PAGES
@@ -93,6 +94,10 @@ function showPage(page){
   if(page==="order"){
     content.innerHTML = `<h2>${T[lang].order}</h2>`;
   }
+ 
+if(page==="material-upload"){
+  document.getElementById("page-material-upload").classList.remove("hidden");
+}
 
   if(page==="excel"){
     content.innerHTML = `
