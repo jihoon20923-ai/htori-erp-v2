@@ -6,84 +6,99 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <link rel="stylesheet" href="style.css">
 
-  <!-- XLSX for Excel upload -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-</head>
 
+  <!-- Excel Parser -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
 <body>
 
-<!-- 🔵 LOGIN BOX -->
-<div id="loginBox">
-  <div class="modal-card">
-      <h2>HTORI ERP LOGIN</h2>
-
-      <input id="loginId" placeholder="ID">
-      <input id="loginPw" type="password" placeholder="Password">
-
-      <button id="loginBtn" class="btn primary">Login</button>
-      <button id="demoBtn" class="btn">Demo</button>
-  </div>
-</div>
-
-<!-- 🔵 ERP MAIN UI -->
-<div id="erp" class="hidden">
-
-  <!-- Header -->
+  <!-- HEADER -->
   <header class="site-header">
     <div class="header-left">
       <button id="hamburger" class="hamburger">☰</button>
-      <span class="brand-title">HTORI ERP Realtime - v1.1</span>
+      <div class="brand">
+        <img src="logo.png" alt="Htori" style="height:34px;margin-right:10px;">
+        <span id="brand-title">HTORI ERP Realtime</span>
+        <small style="opacity:.7;margin-left:8px;">v1.1</small>
+      </div>
     </div>
 
     <div class="header-right">
-      <span id="user-info">User:</span>
+      <span id="user-info" class="user-info">
+        User: <span id="user-name">Guest</span>
+        (<span id="user-role">viewer</span>)
+      </span>
 
-      <button class="lang-btn" data-lang="EN">EN</button>
-      <button class="lang-btn" data-lang="KR">KR</button>
-      <button class="lang-btn" data-lang="ID">ID</button>
+      <div class="lang-buttons">
+        <button class="lang-btn" data-lang="EN">EN</button>
+        <button class="lang-btn" data-lang="KR">KR</button>
+        <button class="lang-btn" data-lang="ID">ID</button>
+      </div>
 
-      <button id="logoutBtn" class="btn small">Logout</button>
+      <button id="logoutBtn" class="btn small hidden">Logout</button>
     </div>
   </header>
 
-  <!-- Layout -->
+  <!-- LAYOUT -->
   <div class="layout">
+    <!-- SIDEBAR -->
     <nav id="sidebar" class="sidebar">
-      <!-- renderMenu()가 자동으로 채움 -->
+      <ul id="menuList"></ul>
     </nav>
 
-    <main id="content" class="content">
-      <!-- showPage()가 채움 -->
-    </main>
+    <!-- CONTENT -->
+    <main id="content" class="content"></main>
   </div>
-</div>
 
-<!-- 🔵 MATERIAL UPLOAD PAGE (숨김) -->
-<div id="page-material-upload" class="hidden page">
-  <h2>Material Upload</h2>
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="modal-backdrop">
+    <div class="modal-card">
+      <h2>HTORI ERP LOGIN</h2>
 
-  <input id="materialExcelFile" type="file">
-  <button onclick="previewMaterialExcel()">Preview</button>
-  <button onclick="uploadMaterialExcel()">Upload</button>
+      <div class="form-row">
+        <input id="loginId" placeholder="ID">
+      </div>
 
-  <table border="1" style="margin-top:20px; width:100%;">
-     <thead id="materialPreviewHead"></thead>
-     <tbody id="materialPreviewBody"></tbody>
-  </table>
-</div>
+      <div class="form-row">
+        <input id="loginPw" type="password" placeholder="Password">
+      </div>
 
-<!-- Scripts -->
-<script src="app.js"></script>
+      <div class="form-row form-actions">
+        <button id="loginBtn" class="btn primary">Login</button>
+        <button id="demoBtn" class="btn">Demo</button>
+      </div>
+    </div>
+  </div>
 
-<!-- 로그인 버튼 연결 -->
-<script>
-document.getElementById("loginBtn").onclick = login;
-document.getElementById("demoBtn").onclick = demoLogin;
-</script>
+  <!-- DEFAULT PAGE TEMPLATE -->
+  <template id="tpl-dashboard">
+    <h1>Dashboard</h1>
+    <div class="card">
+      <h3>Today / This Month</h3>
+      <p class="muted">KPIs will be displayed here.</p>
+    </div>
+  </template>
 
+  <!-- SETTINGS PAGE -->
+  <template id="tpl-settings">
+    <h1>Settings</h1>
+    <div class="card">
+      <label>Default Language</label>
+      <select id="settingDefaultLang">
+        <option>EN</option>
+        <option>KR</option>
+        <option>ID</option>
+      </select>
+
+      <label style="margin-top:12px">Menu Order</label>
+      <input id="settingMenuOrder">
+    </div>
+  </template>
+
+  <script src="lang.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
