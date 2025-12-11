@@ -46,6 +46,15 @@ function login(){
     showPage("dashboard");
   });
 }
+function demoLogin(){
+  currentUser = { id:"demo", name:"Demo User", role:"viewer" };
+
+  loginBox.classList.add("hidden");
+  erp.classList.remove("hidden");
+
+  renderMenu();
+  showPage("dashboard");
+}
 
 /***********************
  MULTI LANGUAGE
