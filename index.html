@@ -1,62 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>HTORI ERP</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-  <!-- Firebase -->
+  <meta charset="utf-8" />
+  <title>HTORI ERP Realtime - v1.1</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+  <!-- Firebase (optional, app.js will reference if configured) -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-  <!-- SheetJS (Excel Upload) -->
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ✅ LOGIN -->
-<div id="loginBox" class="login-box">
-  <h2>HTORI ERP LOGIN</h2>
-  <input id="loginId" placeholder="ID">
-  <input id="loginPw" type="password" placeholder="Password">
-  <button onclick="login()">LOGIN</button>
-</div>
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <button id="hamburger" class="hamburger" aria-label="toggle menu">☰</button>
+      <div class="brand">
+        <img src="logo.png" alt="Htori Logo" id="brand-logo" style="height:34px; display:inline-block; margin-right:10px; vertical-align:middle;">
+        <span id="brand-title">HTORI ERP Realtime</span>
+        <small id="brand-sub" style="opacity:.85; margin-left:8px;">- v1.1</small>
+      </div>
+    </div>
 
-<!-- ✅ ERP -->
-<div id="erp" class="hidden">
+    <div class="header-right">
+      <div id="user-info" class="user-info">User: <span id="user-name">Guest</span> (<span id="user-role">viewer</span>)</div>
+      <div class="lang-buttons">
+        <button class="lang-btn" data-lang="EN">EN</button>
+        <button class="lang-btn" data-lang="KR">KR</button>
+        <button class="lang-btn" data-lang="ID">ID</button>
+      </div>
+      <button id="logoutBtn" class="btn small hidden">Logout</button>
+    </div>
+  </header>
 
-<header class="header">
-  <div class="logo">HTORI ERP</div>
+  <!-- MAIN LAYOUT -->
+  <div class="layout">
 
-  <div class="lang-buttons">
-    <button onclick="setLanguage('EN')">EN</button>
-    <button onclick="setLanguage('KR')">KR</button>
-    <button onclick="setLanguage('ID')">ID</button>
+    <!-- SIDEBAR -->
+    <nav id="sidebar" class="sidebar">
+      <ul id="menuList" class="menu-list">
+        <!-- Menu items injected by app.js according to settings & role -->
+      </ul>
+    </nav>
+
+    <!-- CONTENT -->
+    <main id="content" class="content">
+      <!-- Pages are dynamically rendered here -->
+    </main>
   </div>
-</header>
 
-<aside id="sidebar" class="sidebar"></aside>
-<main id="content"></main>
-<!-- ===== A-1: Excel → Material Upload ===== -->
-<div id="page-material-upload" class="hidden">
-  <h2>Material Upload (Excel)</h2>
+  <!-- LOGIN MODAL (centered) -->
+  <div id="loginModal" class="modal-backdrop">
+    <div class="modal-card">
+      <h2 id="loginTitle">HTORI ERP LOGIN</h2>
 
-  <div class="form-row">
-    <input type="file" id="materialExcelFile" accept=".xlsx,.xls">
-    <button onclick="previewMaterialExcel()">Preview</button>
-    <button onclick="uploadMaterialExcel()">Upload</button>
+      <div class="form-row">
+        <label for="loginId" class="sr-only">ID</label>
+        <input id="loginId" placeholder="ID" autocomplete="username">
+      </div>
+
+      <div class="form-row">
+        <label for="loginPw" class="sr-only">Password</label>
+        <input id="loginPw" type="password" placeholder="Password" autocomplete="current-password">
+      </div>
+
+      <div class="form-row form-actions">
+        <button id="loginBtn" class="btn primary">Login</button>
+        <button id="demoBtn" class="btn">Demo</button>
+      </div>
+
+      <div id="loginNotice" class="muted small"></div>
+    </div>
   </div>
 
-  <table>
-    <thead id="materialPreviewHead"></thead>
-    <tbody id="materialPreviewBody"></tbody>
-  </table>
-</div>
+  <!-- SKELETON PAGES (only fallback content, real pages live in pages/*.html or app.js templates) -->
+  <template id="tpl-dashboard">
+    <section class="page">
+      <h1 data-i18n="dashboard.title">Dashboard</h1>
+      <div class="card">
+        <h3>Today / This Month (placeholder)</h3>
+        <p class="muted">This area will be linked to sales, profit and production KPIs.</p>
+      </div>
+    </section>
+  </template>
 
-</div>
+  <template id="tpl-settings">
+    <section class="page">
+      <h1>Settings</h1>
+      <div class="card">
+        <label>Default language</label>
+        <select id="settingDefaultLang">
+          <option>EN</option>
+          <option>KR</option>
+          <option>ID</option>
+        </select>
 
-<script src="app.js"></script>
+        <label style="margin-top:12px">Menu order (comma separated)</label>
+        <input id="settingMenuOrder" placeholder="dashboard,production,outsource,shipment,cost,employees,settings" />
+
+        <div style="margin-top:12px">
+          <button id="saveSettingsBtn" class="btn primary">Save</button>
+          <button id="resetDataBtn" class="btn warning">Reset Data</button>
+        </div>
+
+        <p class="muted" style="margin-top:10px">Menu keys: dashboard,production,outsource,shipment,cost,employees,settings,receiving,order,mrp</p>
+      </div>
+    </section>
+  </template>
+
+  <!-- POINTER: app.js will load additional page templates from pages/ folder or build them dynamically -->
+
+  <!-- SCRIPTS -->
+  <script src="lang.js"></script>
+  <script src="app.js"></script>
+
 </body>
 </html>
